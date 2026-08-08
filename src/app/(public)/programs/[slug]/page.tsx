@@ -31,7 +31,7 @@ export async function generateMetadata({
   if (!program) return { title: 'Program not found' };
 
   return {
-    title: `${program.programName} — Department of Business Administration`,
+    title: `${program.programName} — Department of Law`,
     description: program.description,
     openGraph: {
       title: `${program.programName} — Sonargaon University`,

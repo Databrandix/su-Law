@@ -278,7 +278,7 @@ export default function Sidebar({
           Dept. of
         </div>
         <div className="text-base font-display font-bold text-primary mt-1 leading-tight">
-          Business Administration
+          Law
         </div>
       </div>
 

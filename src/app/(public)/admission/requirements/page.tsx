@@ -11,7 +11,7 @@ import { getAdmissionRequirements, getPageHero } from '@/lib/identity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export const metadata = {
-  title: 'Admission Requirements — Department of Business Administration',
+  title: 'Admission Requirements — Department of Law',
   description:
     'Admission requirements at Sonargaon University — Undergraduate, Graduate, and Diploma (Engineering) entry criteria.',
 };

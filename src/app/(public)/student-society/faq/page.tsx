@@ -4,7 +4,7 @@ import { getFaqs, getPageHero } from '@/lib/identity';
 import FAQList from './FAQList';
 
 export const metadata = {
-  title: 'FAQs — Department of Business Administration',
+  title: 'FAQs — Department of Law',
   description:
     'Frequently asked questions about admission, rankings, campus, programs, and exams at Sonargaon University.',
 };

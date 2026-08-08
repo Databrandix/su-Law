@@ -38,7 +38,7 @@ export default function SyllabusForm({ initial }: { initial: Syllabus | null }) 
       <Card title="Basics">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextField label="Slug" name="slug" required monospace
-                     defaultValue={initial?.slug ?? ''} placeholder="bba-business-administration" />
+                     defaultValue={initial?.slug ?? ''} placeholder="llb-law" />
           <SelectField label="Level" name="level" required options={LEVELS}
                        defaultValue={initial?.level ?? 'Undergraduate'} />
         </div>
@@ -46,7 +46,7 @@ export default function SyllabusForm({ initial }: { initial: Syllabus | null }) 
         <TextField label="Short title" name="shortTitle" defaultValue={initial?.shortTitle ?? ''}
                    placeholder="Optional — falls back to the full title" />
         <TextField label="Department" name="department" required
-                   defaultValue={initial?.department ?? 'Business Administration'} />
+                   defaultValue={initial?.department ?? 'Law'} />
         <TextAreaField label="Summary" name="summary" rows={4}
                        defaultValue={initial?.summary ?? ''} />
       </Card>

@@ -38,7 +38,7 @@ export default function ProspectusForm({ initial }: { initial: ProspectusEntry |
       <Card title="Basics">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextField label="Slug" name="slug" required monospace
-                     defaultValue={initial?.slug ?? ''} placeholder="bba-business-administration" />
+                     defaultValue={initial?.slug ?? ''} placeholder="llb-law" />
           <SelectField label="Level (optional)" name="level" options={LEVELS}
                        emptyLabel="— No level —"
                        defaultValue={initial?.level ?? ''} />
@@ -46,7 +46,7 @@ export default function ProspectusForm({ initial }: { initial: ProspectusEntry |
         <TextField label="Title (full)" name="title" required defaultValue={initial?.title ?? ''} />
         <TextField label="Short title (shown on card)" name="shortTitle" required defaultValue={initial?.shortTitle ?? ''} />
         <TextField label="Department" name="department" required
-                   defaultValue={initial?.department ?? 'Business Administration'} />
+                   defaultValue={initial?.department ?? 'Law'} />
       </Card>
 
       <Card title="Cover image">

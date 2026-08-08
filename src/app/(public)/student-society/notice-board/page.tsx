@@ -4,7 +4,7 @@ import { getNotices, getPageHero } from '@/lib/identity';
 import NoticesClient from './NoticesClient';
 
 export const metadata = {
-  title: 'Notice Board — Department of Business Administration',
+  title: 'Notice Board — Department of Law',
   description:
     'Departmental notices and announcements — registration, holidays, transport, and student services.',
 };

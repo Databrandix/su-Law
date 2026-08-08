@@ -6,9 +6,9 @@ import { getNewsletterPage } from '@/lib/identity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export const metadata = {
-  title: 'Newsletter — Department of Business Administration',
+  title: 'Newsletter — Department of Law',
   description:
-    'Subscribe to the Department of Business Administration newsletter for monthly updates on events, research, admissions, and student achievements.',
+    'Subscribe to the Department of Law newsletter for monthly updates on events, research, admissions, and student achievements.',
 };
 
 type AdvantageRow = {

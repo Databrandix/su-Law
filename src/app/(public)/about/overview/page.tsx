@@ -4,9 +4,9 @@ import { getAboutOverview } from '@/lib/identity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export const metadata = {
-  title: 'Overview — Department of Business Administration',
+  title: 'Overview — Department of Law',
   description:
-    'Overview of the Department of Business Administration — programs, vision, and the scope of business administration as a discipline and a career.',
+    'Overview of the Department of Law — programs, vision, and the scope of law as a discipline and a career.',
 };
 
 export default async function OverviewPage() {

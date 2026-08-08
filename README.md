@@ -1,6 +1,6 @@
-# Sonargaon University — Department of Business Administration
+# Sonargaon University — Department of Law
 
-Website for the Department of Business Administration, Faculty of Business,
+Website for the Department of Law, Faculty of Arts and Humanities,
 Sonargaon University. Nearly all content is managed through a built-in admin
 panel rather than hardcoded, so staff can update the site without a deploy.
 

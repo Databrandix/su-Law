@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const ev = await getEventBySlug(slug);
   if (!ev) return { title: 'Event not found' };
   return {
-    title: `${ev.shortTitle} — Department of Business Administration`,
+    title: `${ev.shortTitle} — Department of Law`,
     description: ev.summary,
   };
 }
@@ -132,7 +132,7 @@ export default async function EventDetailPage({
             <h3 className="font-display text-xl font-bold text-primary mb-5">Event Details</h3>
 
             <div className="space-y-5">
-              <DetailRow Icon={Building2} label="Department" value="Business Administration" />
+              <DetailRow Icon={Building2} label="Department" value="Law" />
               {dateLabel && <DetailRow Icon={Calendar} label="Date" value={dateLabel} />}
               {ev.time && <DetailRow Icon={Clock} label="Time" value={ev.time} />}
               {ev.venue && <DetailRow Icon={MapPin} label="Venue" value={ev.venue} />}
@@ -154,7 +154,7 @@ export default async function EventDetailPage({
               <DetailRow
                 Icon={GraduationCap}
                 label="Faculty"
-                value="Faculty of Business"
+                value="Faculty of Arts and Humanities"
               />
             </div>
           </aside>

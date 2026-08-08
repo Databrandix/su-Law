@@ -91,7 +91,7 @@ export default function ProspectusClient({ items }: { items: ProspectusItem[] })
                 Postgraduate prospectus coming soon
               </p>
               <p className="text-gray-500 text-sm">
-                Postgraduate programs in Business Administration are not offered yet. Please check back later for updates.
+                Postgraduate programs in Law are not offered yet. Please check back later for updates.
               </p>
             </>
           ) : (

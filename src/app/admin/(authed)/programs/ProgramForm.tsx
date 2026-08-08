@@ -45,7 +45,7 @@ export default function ProgramForm({ initial }: { initial: Program | null }) {
         </div>
         <TextField label="Page slug (optional)" name="slug" monospace
                    defaultValue={initial?.slug ?? ''}
-                   placeholder="bba" />
+                   placeholder="llb" />
         <p className="text-xs text-gray-500 -mt-2">
           Publishes a dedicated program page at{' '}
           <code className="font-mono">/programs/&lt;slug&gt;</code>, which the
@@ -63,7 +63,7 @@ export default function ProgramForm({ initial }: { initial: Program | null }) {
                      placeholder="e.g. View More" />
           <TextField label="CTA href (optional)" name="ctaHref"
                      defaultValue={initial?.ctaHref ?? ''}
-                     placeholder="/programs/bba" />
+                     placeholder="/programs/llb" />
         </div>
         <p className="text-xs text-gray-500 -mt-2">
           CTA href overrides the program page link — set it only to point

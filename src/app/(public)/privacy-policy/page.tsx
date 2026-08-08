@@ -6,7 +6,7 @@ import { getLegalPagesContent } from '@/lib/identity';
 export const metadata = {
   title: 'Privacy Policy — Sonargaon University',
   description:
-    'Privacy Policy for the Department of Business Administration, Sonargaon University — how we handle visitor information and respect your consent.',
+    'Privacy Policy for the Department of Law, Sonargaon University — how we handle visitor information and respect your consent.',
 };
 
 export default async function PrivacyPolicyPage() {

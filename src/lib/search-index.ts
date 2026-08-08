@@ -312,7 +312,7 @@ export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
 
   // ProgramFeeStructure (Phase 8b — DB). Per-program fee entries.
   // introOverline carries the user-facing program label (e.g.
-  // "BBA in Business Administration"). All entries link to
+  // "LLB (Hons) in Law"). All entries link to
   // /admission/tuition-fees — programs render stacked there.
   const feeItems: SearchItem[] = feeStructureRows.map((f) => ({
     title: f.introOverline,

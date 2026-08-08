@@ -3,9 +3,9 @@ import ProgramsSection from '@/components/sections/ProgramsSection';
 import { getProgramsWithCta, getPageHero } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Programs — Department of Business Administration',
+  title: 'Programs — Department of Law',
   description:
-    'Undergraduate and graduate programs offered by the Department of Business Administration, Sonargaon University — BBA, MBA, EMBA, MBM, and specialised master’s degrees.',
+    'Undergraduate and graduate programs offered by the Department of Law, Sonargaon University — LLB and LLM degrees.',
 };
 
 export default async function ProgramsIndexPage() {

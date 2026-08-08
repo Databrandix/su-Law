@@ -203,7 +203,7 @@ export default async function FacultyDetailPage({
                 )}
                 <p className="text-sm text-gray-600 flex items-center justify-center lg:justify-start gap-2 pt-1">
                   <Building2 size={14} className="text-accent shrink-0" />
-                  {member.isDean ? 'Faculty of Business' : dept.name}
+                  {member.isDean ? 'Faculty of Arts and Humanities' : dept.name}
                 </p>
                 <p className="text-sm text-gray-500 flex items-center justify-center lg:justify-start gap-2 pt-1">
                   <Building2 size={14} className="text-accent shrink-0" />

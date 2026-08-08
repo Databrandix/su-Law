@@ -5,9 +5,9 @@ import Container from '@/components/ui/Container';
 import { getVisitors, getPageHero } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Visitors — Department of Business Administration',
+  title: 'Visitors — Department of Law',
   description:
-    'Distinguished visitors and guests of the Department of Business Administration, Sonargaon University.',
+    'Distinguished visitors and guests of the Department of Law, Sonargaon University.',
 };
 
 // Defensive Json read — quote column is Prisma `Json` (string[]).

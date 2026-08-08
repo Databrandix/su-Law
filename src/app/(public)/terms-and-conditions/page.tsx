@@ -6,7 +6,7 @@ import { getLegalPagesContent } from '@/lib/identity';
 export const metadata = {
   title: 'Terms & Conditions — Sonargaon University',
   description:
-    'Terms & Conditions for the Department of Business Administration, Sonargaon University — site usage, consent, log files, and how we use your information.',
+    'Terms & Conditions for the Department of Law, Sonargaon University — site usage, consent, log files, and how we use your information.',
 };
 
 export default async function TermsAndConditionsPage() {

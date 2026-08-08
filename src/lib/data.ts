@@ -1,29 +1,7 @@
-export const programs: {
-  id: string;
-  title: string;
-  subtitle?: string;
-  duration?: string;
-  description: string;
-  image: string;
-  specializations?: string[];
-  cta: string;
-}[] = [
-  {
-    id: 'undergrad',
-    title: 'Undergraduate',
-    subtitle: 'BBA in Business Administration',
-    duration: '4 Years · 8 Semesters',
-    description: 'Our flagship undergraduate program builds a strong foundation in core business administration — combining rigorous theory, modern case analysis, and strategic projects that prepare graduates for leadership, management, and global postgraduate study.',
-    image: '/assets/program-undergraduate.webp',
-    specializations: [
-  'Finance & Banking',
-  'Marketing',
-  'Human Resource Management',
-  'Supply Chain Management',
-    ],
-    cta: 'View More',
-  },
-];
+// `programs` and `researchAreas` used to live here. Both moved to the
+// database (Program / ResearchArea tables, read via src/lib/identity.ts)
+// and the arrays were left behind unused — removed during the Law
+// conversion. Only quickLinks and campusServices below are still read.
 
 // quickLinks — Navbar mobile drawer no longer reads this (Phase 3:
 // derives from main_nav 'Admission' group); kept here for the
@@ -38,16 +16,6 @@ export const quickLinks: { name: string; href: string; external?: boolean; disab
   { name: 'ERP', href: 'http://sue.su.edu.bd:5081/sonargaon_erp/', external: true },
   { name: 'Admission Notice', href: '/admission/notice' },
   { name: 'Library', href: 'http://lib.su.edu.bd', external: true },
-];
-
-export const researchAreas = [
-  { name: 'Finance & Banking', icon: 'Flame' },
-  { name: 'Marketing', icon: 'Waves' },
-  { name: 'Human Resource Management', icon: 'Bot' },
-  { name: 'Supply Chain Management', icon: 'Wrench' },
-  { name: 'Entrepreneurship & Innovation', icon: 'Layers' },
-  { name: 'Business Analytics', icon: 'Leaf' },
-  { name: 'International Business', icon: 'Car' }
 ];
 
 export const campusServices: { name: string; description: string; image: string; href?: string }[] = [

@@ -6,9 +6,9 @@ import { DynamicLucideIcon } from '@/components/ui/DynamicLucideIcon';
 import ProgramTabs from './ProgramTabs';
 
 export const metadata = {
-  title: 'Tuition Fees — Department of Business Administration',
+  title: 'Tuition Fees — Department of Law',
   description:
-    'Tuition fee structures by program at Sonargaon University Department of Business Administration.',
+    'Tuition fee structures by program at Sonargaon University Department of Law.',
 };
 
 // Phase 20 — overview / shifts / policies all use DynamicLucideIcon

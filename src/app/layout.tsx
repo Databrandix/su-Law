@@ -25,16 +25,16 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 const SITE_URL = 'https://su-business-administration.vercel.app';
-const SITE_NAME = 'Sonargaon University — Department of Business Administration';
+const SITE_NAME = 'Sonargaon University — Department of Law';
 const SITE_DESCRIPTION =
-  'Department of Business Administration, Faculty of Business, Sonargaon University — programs, faculty, research, admissions, and campus services.';
+  'Department of Law, Faculty of Arts and Humanities, Sonargaon University — programs, faculty, research, admissions, and campus services.';
 const OG_IMAGE = '/assets/og-banner.webp';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_NAME,
-    template: '%s — Sonargaon University BA',
+    template: '%s — Sonargaon University Law',
   },
   description: SITE_DESCRIPTION,
   alternates: {
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
         url: OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: 'Sonargaon University — Department of Business Administration',
+        alt: 'Sonargaon University — Department of Law',
       },
     ],
   },

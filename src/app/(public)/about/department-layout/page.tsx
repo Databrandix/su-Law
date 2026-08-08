@@ -5,9 +5,9 @@ import Container from '@/components/ui/Container';
 import { getAboutDepartmentLayout } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Department Layout — Department of Business Administration',
+  title: 'Department Layout — Department of Law',
   description:
-    'Layout of the Department of Business Administration, Sonargaon University.',
+    'Layout of the Department of Law, Sonargaon University.',
 };
 
 export default async function DepartmentLayoutPage() {

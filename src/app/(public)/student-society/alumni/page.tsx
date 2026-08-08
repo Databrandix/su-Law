@@ -5,9 +5,9 @@ import Container from '@/components/ui/Container';
 import { getAlumni, getPageHero } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Alumni — Department of Business Administration',
+  title: 'Alumni — Department of Law',
   description:
-    'Notable alumni from the Department of Business Administration, Sonargaon University.',
+    'Notable alumni from the Department of Law, Sonargaon University.',
 };
 
 export default async function AlumniPage() {

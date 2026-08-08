@@ -4,9 +4,9 @@ import Container from '@/components/ui/Container';
 import { getAboutMissionVision } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Mission & Vision — Department of Business Administration',
+  title: 'Mission & Vision — Department of Law',
   description:
-    'The mission and vision of the Department of Business Administration, Sonargaon University.',
+    'The mission and vision of the Department of Law, Sonargaon University.',
 };
 
 export default async function MissionVisionPage() {

@@ -73,7 +73,7 @@ export default function AboutDepartmentLayoutForm({
       <Card title="Layout card">
         <TextField label="Caption under the cover" name="cardTitle" required
                    defaultValue={initial?.cardTitle ?? 'Department Layout'}
-                   placeholder="BBA Department Layout" />
+                   placeholder="LLB Department Layout" />
 
         <ImageUploader kind="department-layout-cover" name="cover"
                        label="Cover image"

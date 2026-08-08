@@ -40,7 +40,7 @@ export default function NoticesSection({ notices }: Props) {
             Academic Notices &amp; Announcements
           </h2>
           <p className="text-white/70 text-base md:text-lg">
-            Stay up to date with the latest from the Department of Business Administration — registration, holidays, and student services.
+            Stay up to date with the latest from the Department of Law — registration, holidays, and student services.
           </p>
         </div>
 

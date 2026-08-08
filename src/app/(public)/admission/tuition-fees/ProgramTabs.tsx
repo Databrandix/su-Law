@@ -5,7 +5,7 @@ import { useState, type ReactNode } from 'react';
 export type ProgramTab = {
   /** Stable key — the Program row id. */
   id: string;
-  /** Short code shown on the pill (BBA, EMBA, MBM…). */
+  /** Short code shown on the pill (LLB, LLM…). */
   code: string;
   /** Full name, shown under the tab strip once selected. */
   name: string;

@@ -10,9 +10,9 @@ import {
 } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Message from Head — Department of Business Administration',
+  title: 'Message from Head — Department of Law',
   description:
-    'Welcome message from the Head of the Department of Business Administration, Sonargaon University.',
+    'Welcome message from the Head of the Department of Law, Sonargaon University.',
 };
 
 // Shares the Dean's-message banner — both /about message pages use it.

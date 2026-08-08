@@ -27,10 +27,10 @@ export default function HomeOverviewForm({ initial }: { initial: HomeOverview | 
       <Card title="Content">
         <TextField label="Heading" name="heading" required
                    defaultValue={initial?.heading ?? ''}
-                   placeholder="Business Administration (BA)" />
+                   placeholder="Law (LLB)" />
         <TextAreaField label="Body (HTML allowed)" name="body" required rows={6}
                        defaultValue={initial?.body ?? ''}
-                       placeholder="The Department of Business Administration is committed to…" />
+                       placeholder="The Department of Law is committed to…" />
         <p className="text-xs text-gray-500 -mt-2">
           Inline emphasis is allowed:{' '}
           <code className="font-mono">&lt;strong&gt;…&lt;/strong&gt;</code>,{' '}
@@ -49,7 +49,7 @@ export default function HomeOverviewForm({ initial }: { initial: HomeOverview | 
         />
         <TextField label="Image alt text" name="imageAlt"
                    defaultValue={initial?.imageAlt ?? ''}
-                   placeholder="Sonargaon University Business Administration students" />
+                   placeholder="Sonargaon University Law students" />
         <p className="text-xs text-gray-500 -mt-2">
           Describes the image for screen readers and search engines.
         </p>

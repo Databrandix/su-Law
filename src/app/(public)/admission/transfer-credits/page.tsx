@@ -5,7 +5,7 @@ import { getAdmissionTransferCredits, getPageHero } from '@/lib/identity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export const metadata = {
-  title: 'Transfer Credits — Department of Business Administration',
+  title: 'Transfer Credits — Department of Law',
   description:
     'Credit transfer policy at Sonargaon University — minimum grades, transfer limits, fees, and the documents required to apply.',
 };

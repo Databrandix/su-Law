@@ -5,9 +5,9 @@ import Container from '@/components/ui/Container';
 import { getResearchPapers, getPageHero } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Research — Department of Business Administration',
+  title: 'Research — Department of Law',
   description:
-    'Published research papers from the Department of Business Administration, Sonargaon University.',
+    'Published research papers from the Department of Law, Sonargaon University.',
 };
 
 export default async function ResearchPage() {
@@ -29,7 +29,7 @@ export default async function ResearchPage() {
         <div className="mx-auto max-w-3xl text-center mb-10 md:mb-14">
           <p className="text-[15px] md:text-[16px] leading-[1.85] text-gray-700">
             A selection of research publications by faculty and students of the
-            Department of Business Administration, Sonargaon University, spanning
+            Department of Law, Sonargaon University, spanning
             finance, marketing, human resource management, entrepreneurship,
             and more.
           </p>

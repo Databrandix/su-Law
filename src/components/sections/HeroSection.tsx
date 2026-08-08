@@ -9,8 +9,8 @@ import {ChevronRight, Home} from 'lucide-react';
 // (Phase 3). When an admin replaces a hero image, they edit the
 // matching alt in the same form. Null alt → generic slot label.
 const FALLBACK_ALTS = [
-  'Sonargaon University — Department of Business Administration',
-  'Sonargaon University — Faculty of Business',
+  'Sonargaon University — Department of Law',
+  'Sonargaon University — Faculty of Arts and Humanities',
   'Sonargaon University campus',
 ];
 
@@ -41,7 +41,7 @@ export default function HeroSection({
 }: HeroSectionProps) {
   const heroImages = imageUrls.map((src, i) => ({
     src,
-    alt: imageAlts[i] ?? FALLBACK_ALTS[i] ?? `Sonargaon University — Department of Business Administration, slide ${i + 1}`,
+    alt: imageAlts[i] ?? FALLBACK_ALTS[i] ?? `Sonargaon University — Department of Law, slide ${i + 1}`,
     verticalPercent: imageVerticalPercents[i] ?? 50,
   }));
   const [activeImage, setActiveImage] = useState(0);
