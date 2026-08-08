@@ -1,0 +1,1 @@
+ALTER TABLE "faculty" ADD COLUMN "fieldOfInterest" JSONB;
