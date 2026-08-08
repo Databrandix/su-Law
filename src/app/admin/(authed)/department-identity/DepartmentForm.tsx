@@ -28,11 +28,11 @@ export default function DepartmentForm({ initial }: { initial: Initial }) {
     <form action={formAction} className="space-y-6">
       {/* ─── Homepage hero copy ─── */}
       <Card title="Homepage hero">
-        <TextField label="Program Name" name="programName"
+        <TextField label="Name" name="programName"
                    defaultValue={initial?.programName ?? ''} />
-        <TextField label="Program Short Form" name="programShortForm"
+        <TextField label="Short Form" name="programShortForm"
                    defaultValue={initial?.programShortForm ?? ''} />
-        <TextField label="Program Subtitle Name" name="programSubtitle"
+        <TextField label="Subtitle" name="programSubtitle"
                    defaultValue={initial?.programSubtitle ?? ''} />
       </Card>
 
@@ -66,6 +66,21 @@ export default function DepartmentForm({ initial }: { initial: Initial }) {
           name="logo"
           initialUrl={initial?.logoUrl}
           initialPublicId={initial?.logoPublicId}
+        />
+      </Card>
+
+      {/* ─── Social share card ─── */}
+      <Card title="Social share image (Open Graph)">
+        <p className="text-sm text-gray-500 mb-3">
+          Shown when a link to this site is shared on Facebook, LinkedIn, X, or
+          WhatsApp. Recommended size 1200×630 pixels. Leave empty to use the
+          bundled default banner.
+        </p>
+        <ImageUploader
+          kind="department-og"
+          name="ogImage"
+          initialUrl={initial?.ogImageUrl ?? undefined}
+          initialPublicId={initial?.ogImagePublicId ?? undefined}
         />
       </Card>
 

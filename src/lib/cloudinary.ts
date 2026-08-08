@@ -31,6 +31,7 @@ function ensureConfigured() {
 const KIND_TO_SUBFOLDER: Record<string, string> = {
   'department-logo':       'department/logo',
   'department-hero':       'department/hero',
+  'department-og':         'department/og',
   'university-logo':       'university/logo',
   'program-image':         'programs',
   'research-icon':         'research-areas',

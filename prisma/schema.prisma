@@ -92,6 +92,13 @@ model DepartmentIdentity {
   logoPublicId       String?
   breadcrumbLabel    String
 
+  // Social share card (Open Graph + Twitter). Read by the root layout's
+  // generateMetadata(); when null it falls back to the bundled
+  // /assets/og-banner.webp so a fresh install still shares correctly.
+  // Recommended size 1200x630.
+  ogImageUrl         String?
+  ogImagePublicId    String?
+
   // Homepage hero copy. programName renders as the big <h1>; the
   // component inserts the line break, so keep this as plain text.
   // programShortForm is the yellow "(BBA)" suffix — omit/blank to

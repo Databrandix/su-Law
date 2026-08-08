@@ -21,6 +21,9 @@ export const departmentUpdateSchema = z.object({
   logoUrl:         z.string().min(1),
   logoPublicId:    nullableString,
   breadcrumbLabel: z.string().min(1).max(50),
+  // Social share card — optional; null falls back to the bundled banner.
+  ogImageUrl:      optionalNullableString,
+  ogImagePublicId: optionalNullableString,
   // Hero copy — optional so an empty field falls back to the
   // department name rather than blocking the whole form save.
   programName:      z.string().max(200).default(''),
@@ -278,6 +281,7 @@ export const cloudinaryDeleteSchema = z.object({
 export const uploadKindSchema = z.enum([
   'department-logo',
   'department-hero',
+  'department-og',
   'university-logo',
   'program-image',
   'research-icon',

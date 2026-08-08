@@ -33,6 +33,8 @@ export async function updateDepartmentAction(
     logoUrl:            getStr(formData, 'logoUrl'),
     logoPublicId:       emptyToNull(formData.get('logoPublicId')),
     breadcrumbLabel:    getStr(formData, 'breadcrumbLabel'),
+    ogImageUrl:         emptyToNull(formData.get('ogImageUrl')),
+    ogImagePublicId:    emptyToNull(formData.get('ogImagePublicId')),
     programName:        getStr(formData, 'programName'),
     programShortForm:   getStr(formData, 'programShortForm'),
     programSubtitle:    getStr(formData, 'programSubtitle'),

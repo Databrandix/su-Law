@@ -24,45 +24,56 @@ const hindSiliguri = Hind_Siliguri({
   display: 'swap',
 });
 
-const SITE_URL = 'https://su-business-administration.vercel.app';
+const SITE_URL = 'https://su-law.vercel.app';
 const SITE_NAME = 'Sonargaon University — Department of Law';
 const SITE_DESCRIPTION =
   'Department of Law, Faculty of Arts and Humanities, Sonargaon University — programs, faculty, research, admissions, and campus services.';
-const OG_IMAGE = '/assets/og-banner.webp';
+// Fallback share card, used when DepartmentIdentity.ogImageUrl is unset
+// (fresh install, or before the chair uploads one).
+const OG_IMAGE_FALLBACK = '/assets/og-banner.webp';
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: SITE_NAME,
-    template: '%s — Sonargaon University Law',
-  },
-  description: SITE_DESCRIPTION,
-  alternates: {
-    canonical: '/',
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: '/',
-    siteName: SITE_NAME,
-    title: SITE_NAME,
+// generateMetadata (not a static `metadata` object) so the share card can
+// come from the DB and be swapped in /admin without a deploy.
+// getDepartmentIdentity is React.cache-wrapped and shares its query with
+// RootLayout below, so this costs no extra round-trip.
+export async function generateMetadata(): Promise<Metadata> {
+  const dept = await getDepartmentIdentity();
+  const ogImage = dept.ogImageUrl || OG_IMAGE_FALLBACK;
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: SITE_NAME,
+      template: '%s — Sonargaon University Law',
+    },
     description: SITE_DESCRIPTION,
-    images: [
-      {
-        url: OG_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: 'Sonargaon University — Department of Law',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: SITE_NAME,
-    description: SITE_DESCRIPTION,
-    images: [OG_IMAGE],
-  },
-};
+    alternates: {
+      canonical: '/',
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'en_US',
+      url: '/',
+      siteName: SITE_NAME,
+      title: SITE_NAME,
+      description: SITE_DESCRIPTION,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: SITE_NAME,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: SITE_NAME,
+      description: SITE_DESCRIPTION,
+      images: [ogImage],
+    },
+  };
+}
 
 // Phase 18 — minimal root layout. The previous root layout pulled in
 // the admin-vs-public chrome conditional via `headers()` to read

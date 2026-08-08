@@ -94,7 +94,9 @@ export default async function MessageFromHeadPage() {
                   {head.messageTitleLine1 && (
                     <p className="text-white/80 text-sm mt-1">{head.messageTitleLine1}</p>
                   )}
-                  <p className="text-white/70 text-sm">{dept.name}</p>
+                  {head.messageTitleLine2 && (
+                    <p className="text-white/70 text-sm">{head.messageTitleLine2}</p>
+                  )}
                   <p className="text-white/70 text-sm">{uni.name}</p>
                 </div>
               </div>

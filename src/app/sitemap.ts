@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/db';
 
-const BASE_URL = 'https://su-business-administration.vercel.app';
+const BASE_URL = 'https://su-law.vercel.app';
 
 const staticRoutes: { path: string; priority: number; changeFrequency: 'weekly' | 'monthly' | 'yearly' }[] = [
   { path: '/', priority: 1.0, changeFrequency: 'weekly' },

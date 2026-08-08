@@ -14,6 +14,7 @@ import { compressImage, formatBytes } from '@/lib/image-compress';
 type Kind =
   | 'department-logo'
   | 'department-hero'
+  | 'department-og'
   | 'university-logo'
   | 'program-image'
   | 'research-icon'
@@ -53,6 +54,7 @@ type Kind =
 const RECOMMENDED_SIZE_BY_KIND: Record<Kind, string | null> = {
   'department-logo':       'Square / horizontal logo · transparent PNG · ~512×512',
   'department-hero':       'Landscape banner · 1920×600 (16:5) recommended',
+  'department-og':         'Social share card · 1200×630 (1.91:1) required',
   'university-logo':       'Horizontal logo · transparent PNG · ~600×200',
   'program-image':         'Landscape · 1200×675 (16:9)',
   'research-icon':         'Square · 400×400',
