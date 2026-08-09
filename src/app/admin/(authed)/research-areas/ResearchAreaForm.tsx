@@ -151,6 +151,11 @@ export default function ResearchAreaForm({
               name="featuredImage"
               aspectRatio="wide"
               label="Featured card image"
+              // The kind default ("Square · 400×400") describes the icon
+              // tile, not this card — the card is a tall portrait slot
+              // cropped with object-cover, so a square upload loses its
+              // top and bottom.
+              recommendedSize="Portrait · 800×1000 minimum · fills the tall card beside the icon grid"
               initialUrl={initial?.featuredImageUrl}
               initialPublicId={initial?.featuredImagePublicId}
             />

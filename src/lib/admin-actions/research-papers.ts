@@ -36,12 +36,42 @@ function revalidateResearchPaperSurfaces() {
   revalidatePath('/', 'layout');
 }
 
+/**
+ * Co-authors arrive as parallel indexed fields — coAuthorName.0,
+ * coAuthorRole.0, coAuthorSlug.0, … — so the editor can add and remove
+ * rows without JSON in a textarea. Entries with no name are dropped,
+ * which is how a blank row the admin left behind gets discarded.
+ */
+function readCoAuthors(formData: FormData) {
+  // Collect the indices first: keys() yields one entry per field, so a
+  // set keeps each row once, and sorting numerically preserves the
+  // order the admin arranged them in (10 must not sort before 2).
+  const indices = new Set<number>();
+  for (const key of formData.keys()) {
+    const m = key.match(/^coAuthorName\.(\d+)$/);
+    if (m) indices.add(Number(m[1]));
+  }
+
+  const out: { name: string; role: string | null; facultySlug: string | null }[] = [];
+  for (const i of [...indices].sort((a, b) => a - b)) {
+    const name = getStr(formData, `coAuthorName.${i}`);
+    if (!name) continue;
+    out.push({
+      name,
+      role: emptyToNull(formData.get(`coAuthorRole.${i}`)),
+      facultySlug: emptyToNull(formData.get(`coAuthorSlug.${i}`)),
+    });
+  }
+  return out;
+}
+
 function readResearchPaperRow(formData: FormData) {
   return {
     title:           getStr(formData, 'title'),
     authors:         getStr(formData, 'authors'),
     authorRole:      emptyToNull(formData.get('authorRole')),
     facultySlug:     emptyToNull(formData.get('facultySlug')),
+    coAuthors:       readCoAuthors(formData),
     area:            getStr(formData, 'area'),
     date:            emptyToNull(formData.get('date')),
     publicationYear: getIntOrNull(formData, 'publicationYear'),

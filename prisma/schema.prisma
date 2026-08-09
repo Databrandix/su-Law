@@ -812,6 +812,14 @@ model ResearchPaper {
   // for external co-authors or when no profile exists — the name then
   // renders as plain text.
   facultySlug     String?
+  // Additional department authors on the same paper, rendered under the
+  // first author in the same card. Shape mirrors the three fields above:
+  // [{ name, role?, facultySlug? }]. Null/[] means a single author.
+  //
+  // A co-authored paper is ONE publication, so it gets one row — listing
+  // it once per author would inflate the department's output and repeat
+  // the same title down the page.
+  coAuthors       Json?
   area            String   @db.Text
   // date — free-form string. Source data has inconsistent formats:
   // "14 August 2019", "January–February 2023", "2023", "" (empty).

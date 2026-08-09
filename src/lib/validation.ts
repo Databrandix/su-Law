@@ -690,11 +690,20 @@ export const visitorUpdateSchema = visitorCreateSchema;
 
 // ─── ResearchPaper ──────────────────────────────────────────────
 
+// Extra department authors on a co-authored paper. Each renders under
+// the first author in the same card, so a shared paper stays one entry.
+export const coAuthorSchema = z.object({
+  name:        z.string().min(1),
+  role:        optionalNullableString,
+  facultySlug: optionalNullableString,
+});
+
 export const researchPaperCreateSchema = z.object({
   title:           z.string().min(1),
   authors:         z.string().min(1),
   authorRole:      optionalNullableString,
   facultySlug:     optionalNullableString,
+  coAuthors:       z.array(coAuthorSchema).default([]),
   area:            z.string().min(1),
   date:            optionalNullableString,
   publicationYear: z.number().int().min(1900).max(2100).nullable().optional(),

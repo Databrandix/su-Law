@@ -24,6 +24,13 @@ export default async function ResearchAreasPage() {
             {areas.length} area{areas.length === 1 ? '' : 's'}
             {areas.length > 1 && ' · drag to reorder'}
           </p>
+          {/* The card image lives on the featured row only, which isn't
+              obvious from a list of otherwise identical entries. */}
+          <p className="mt-1 text-sm text-gray-500">
+            Every area shows as a small icon tile. The one marked{' '}
+            <span className="font-semibold text-accent">Featured</span> also fills the large
+            image card beside the grid — open it to change that image.
+          </p>
         </div>
         <Link
           href="/admin/research-areas/new"

@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ResearchPaper } from '@prisma/client';
 import {
@@ -42,6 +43,8 @@ export default function ResearchPaperForm({ initial }: { initial: ResearchPaper 
           that name into a link to <code className="font-mono">/faculty-member/&lt;slug&gt;</code>;
           leave it blank for external authors.
         </p>
+
+        <CoAuthorsEditor initial={initial?.coAuthors} />
         <TextAreaField label="Department / Affiliation (area)" name="area" required rows={2}
                        defaultValue={initial?.area ?? ''} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -108,6 +111,109 @@ export default function ResearchPaperForm({ initial }: { initial: ResearchPaper 
       </div>
     </form>
   );
+}
+
+type CoAuthor = { name: string; role: string; facultySlug: string };
+
+/**
+ * Extra department authors on the same paper.
+ *
+ * A co-authored paper is one publication, so it gets one row here rather
+ * than one row per author — otherwise the same title repeats down
+ * /research and the publication count is overstated. Each entry below
+ * renders under the main author inside the same card, in this order.
+ *
+ * Fields serialize as coAuthorName.N / coAuthorRole.N / coAuthorSlug.N,
+ * which the server action reassembles; rows left blank are discarded.
+ */
+function CoAuthorsEditor({ initial }: { initial: unknown }) {
+  const [rows, setRows] = useState<CoAuthor[]>(() => normalizeCoAuthors(initial));
+
+  function update(i: number, key: keyof CoAuthor, value: string) {
+    setRows(rows.map((r, idx) => (idx === i ? { ...r, [key]: value } : r)));
+  }
+
+  return (
+    <div className="pt-2 border-t border-gray-100">
+      <div className="flex items-center justify-between mb-1">
+        <span className="block text-sm font-medium text-gray-700">
+          Co-authors from the department (optional)
+        </span>
+        <button
+          type="button"
+          onClick={() => setRows([...rows, { name: '', role: '', facultySlug: '' }])}
+          className="text-xs font-semibold text-accent hover:underline"
+        >
+          + Add co-author
+        </button>
+      </div>
+      <p className="text-xs text-gray-500 mb-3">
+        Listed under the main author on the same card, in this order. Add a
+        co-author here instead of creating a second paper — one paper should
+        appear on <code className="font-mono">/research</code> only once.
+      </p>
+
+      {rows.length === 0 ? (
+        <p className="text-xs text-gray-400 italic">Single-author paper.</p>
+      ) : (
+        <div className="space-y-3">
+          {rows.map((r, i) => (
+            <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-start">
+              <input
+                name={`coAuthorName.${i}`}
+                value={r.name}
+                onChange={(e) => update(i, 'name', e.target.value)}
+                placeholder="Full name"
+                aria-label={`Co-author ${i + 1} name`}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+              />
+              <input
+                name={`coAuthorRole.${i}`}
+                value={r.role}
+                onChange={(e) => update(i, 'role', e.target.value)}
+                placeholder="Designation"
+                aria-label={`Co-author ${i + 1} designation`}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+              />
+              <input
+                name={`coAuthorSlug.${i}`}
+                value={r.facultySlug}
+                onChange={(e) => update(i, 'facultySlug', e.target.value)}
+                placeholder="profile-slug (optional)"
+                aria-label={`Co-author ${i + 1} profile slug`}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+              />
+              <button
+                type="button"
+                onClick={() => setRows(rows.filter((_, idx) => idx !== i))}
+                aria-label={`Remove co-author ${i + 1}`}
+                className="p-2 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Read the Json column defensively — it may be null or hand-edited. */
+function normalizeCoAuthors(value: unknown): CoAuthor[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((raw): CoAuthor[] => {
+    if (typeof raw !== 'object' || raw === null) return [];
+    const o = raw as { name?: unknown; role?: unknown; facultySlug?: unknown };
+    if (typeof o.name !== 'string') return [];
+    return [
+      {
+        name: o.name,
+        role: typeof o.role === 'string' ? o.role : '',
+        facultySlug: typeof o.facultySlug === 'string' ? o.facultySlug : '',
+      },
+    ];
+  });
 }
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
