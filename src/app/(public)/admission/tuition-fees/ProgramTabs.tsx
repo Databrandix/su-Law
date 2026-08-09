@@ -92,14 +92,32 @@ export default function ProgramTabs({
           hidden={p.id !== active.id}
         >
           {p.panel ?? (
-            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-              <p className="mb-1 text-base font-semibold text-primary">
-                Fee structure not yet published
-              </p>
-              <p className="text-sm text-gray-500">
-                Please check back later for the fee table for this program.
-              </p>
-            </div>
+            <>
+              {/* The heading and explanation normally come from the fee
+                  row's own intro fields. A program with no row yet still
+                  needs them — otherwise the tab shows nothing but a
+                  "not published" box with no context for what is
+                  missing or how the fees will be structured. */}
+              <div className="mx-auto mb-10 max-w-3xl text-center md:mb-12">
+                <h2 className="mb-4 font-display text-2xl font-bold leading-tight text-primary md:text-3xl">
+                  Tuition Fee Structure
+                </h2>
+                <p className="text-base leading-[1.85] text-gray-700">
+                  Cost per credit and the total program cost vary with your
+                  academic background and the shift you choose. Waivers are
+                  applied on the standard per-credit rate.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
+                <p className="mb-1 text-base font-semibold text-primary">
+                  Fee structure not yet published
+                </p>
+                <p className="text-sm text-gray-500">
+                  Please check back later for the fee table for this program.
+                </p>
+              </div>
+            </>
           )}
         </div>
       ))}

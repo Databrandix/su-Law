@@ -871,6 +871,10 @@ const feeTierSchema = z.object({
   waiver:    z.string().optional(),
   credits:   z.number().optional(),
   perCredit: z.number(),
+  // Postgraduate tiers quote their own semester and admission fees;
+  // setting either swaps the table's "Credits" column for these two.
+  semesterFees: z.number().optional(),
+  admissionFee: z.number().optional(),
   total:     z.number(),
 });
 

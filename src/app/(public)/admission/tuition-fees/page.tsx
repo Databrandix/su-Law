@@ -25,6 +25,12 @@ type FeeTier = {
   waiver?: string;
   credits?: number;
   perCredit: number;
+  // Postgraduate rows quote the semester and admission fees per tier
+  // rather than only in the overview cards. Both optional: when a group
+  // sets neither, those two columns are dropped from its table, so
+  // undergraduate tables keep their original five columns.
+  semesterFees?: number;
+  admissionFee?: number;
   total: number;
 };
 type FeeGroup = { background: string; tiers: FeeTier[] };
@@ -54,11 +60,13 @@ function coerceTiers(v: unknown): FeeTier[] {
   return v
     .filter((r): r is Record<string, unknown> => typeof r === 'object' && r !== null)
     .map((r) => ({
-      gpa:       typeof r.gpa       === 'string' ? r.gpa       : '',
-      waiver:    typeof r.waiver    === 'string' ? r.waiver    : undefined,
-      credits:   typeof r.credits   === 'number' ? r.credits   : undefined,
-      perCredit: typeof r.perCredit === 'number' ? r.perCredit : 0,
-      total:     typeof r.total     === 'number' ? r.total     : 0,
+      gpa:          typeof r.gpa          === 'string' ? r.gpa          : '',
+      waiver:       typeof r.waiver       === 'string' ? r.waiver       : undefined,
+      credits:      typeof r.credits      === 'number' ? r.credits      : undefined,
+      perCredit:    typeof r.perCredit    === 'number' ? r.perCredit    : 0,
+      semesterFees: typeof r.semesterFees === 'number' ? r.semesterFees : undefined,
+      admissionFee: typeof r.admissionFee === 'number' ? r.admissionFee : undefined,
+      total:        typeof r.total        === 'number' ? r.total        : 0,
     }))
     .filter((t) => t.gpa);
 }
@@ -210,9 +218,22 @@ function FeeStructureBlock({ fs }: { fs: FeeStructureRow }) {
                                   !/fee|structure|rate/i.test(group.background);
                                 // GPA tiers are an undergraduate concept;
                                 // master's rows are named fee categories.
-                                const firstColumnLabel = isBackground
-                                  ? 'GPA Range'
-                                  : 'Category';
+                                // Columns follow the data: a group whose
+                                // rows carry semester/admission fees shows
+                                // those columns and drops "Credits" (the
+                                // credit total is already an overview
+                                // card); undergraduate groups keep the
+                                // original five.
+                                const showFeeColumns = group.tiers.some(
+                                  (t) => t.semesterFees != null || t.admissionFee != null,
+                                );
+                                // Those same rows are keyed by programme
+                                // length rather than by an entry GPA.
+                                const firstColumnLabel = showFeeColumns
+                                  ? 'Duration'
+                                  : isBackground
+                                    ? 'GPA Range'
+                                    : 'Category';
                                 return (
                                 <div key={group.background}>
                                   <h4 className="text-[11px] font-bold tracking-[0.25em] uppercase text-accent mb-3">
@@ -229,12 +250,24 @@ function FeeStructureBlock({ fs }: { fs: FeeStructureRow }) {
                                           <th className="px-3 py-3 text-[11px] font-bold tracking-wider uppercase text-gray-500 text-center">
                                             Waiver
                                           </th>
-                                          <th className="px-3 py-3 text-[11px] font-bold tracking-wider uppercase text-gray-500 text-center">
-                                            Credits
-                                          </th>
+                                          {!showFeeColumns && (
+                                            <th className="px-3 py-3 text-[11px] font-bold tracking-wider uppercase text-gray-500 text-center">
+                                              Credits
+                                            </th>
+                                          )}
                                           <th className="px-3 py-3 text-[11px] font-bold tracking-wider uppercase text-gray-500 text-right">
                                             Per Credit
                                           </th>
+                                          {showFeeColumns && (
+                                            <>
+                                              <th className="px-3 py-3 text-[11px] font-bold tracking-wider uppercase text-gray-500 text-right">
+                                                Semester Fees
+                                              </th>
+                                              <th className="px-3 py-3 text-[11px] font-bold tracking-wider uppercase text-gray-500 text-right">
+                                                Admission Fee
+                                              </th>
+                                            </>
+                                          )}
                                           <th className="px-3 py-3 text-[11px] font-bold tracking-wider uppercase text-gray-500 text-right">
                                             Total Program Cost
                                           </th>
@@ -254,12 +287,28 @@ function FeeStructureBlock({ fs }: { fs: FeeStructureRow }) {
                                             <td className="px-3 py-4 text-center font-display font-bold text-accent">
                                               {tier.waiver ?? '—'}
                                             </td>
-                                            <td className="px-3 py-4 text-center font-display font-bold text-gray-800">
-                                              {tier.credits ?? '—'}
-                                            </td>
+                                            {!showFeeColumns && (
+                                              <td className="px-3 py-4 text-center font-display font-bold text-gray-800">
+                                                {tier.credits ?? '—'}
+                                              </td>
+                                            )}
                                             <td className="px-3 py-4 text-right font-display font-bold text-gray-800">
                                               {fmt(tier.perCredit)}
                                             </td>
+                                            {showFeeColumns && (
+                                              <>
+                                                <td className="px-3 py-4 text-right font-display font-bold text-gray-800">
+                                                  {tier.semesterFees != null
+                                                    ? fmt(tier.semesterFees)
+                                                    : '—'}
+                                                </td>
+                                                <td className="px-3 py-4 text-right font-display font-bold text-gray-800">
+                                                  {tier.admissionFee != null
+                                                    ? fmt(tier.admissionFee)
+                                                    : '—'}
+                                                </td>
+                                              </>
+                                            )}
                                             <td className="px-3 py-4 text-right font-display font-bold text-accent">
                                               {/* A zero total means the row
                                                   quotes a rate, not a cost —

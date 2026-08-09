@@ -27,8 +27,16 @@ type Tier = {
   waiver: string;
   credits: string;
   perCredit: string;
+  // Postgraduate tiers quote their own semester and admission fees.
+  // Filling either swaps the public table's "Credits" column for these
+  // two; leaving both blank keeps the undergraduate five-column layout.
+  semesterFees: string;
+  admissionFee: string;
   total: string;
 };
+/** Editable keys on a Tier — every field except its local id. */
+type TierField = Exclude<keyof Tier, 'id'>;
+
 type Group = {
   id: string;
   background: string;
@@ -72,6 +80,8 @@ function normalize(initial: unknown): Shift[] {
                       waiver:    typeof t.waiver === 'string' ? t.waiver : '',
                       credits:   typeof t.credits === 'number' ? String(t.credits) : (typeof t.credits === 'string' ? t.credits : ''),
                       perCredit: typeof t.perCredit === 'number' ? String(t.perCredit) : (typeof t.perCredit === 'string' ? t.perCredit : ''),
+                      semesterFees: typeof t.semesterFees === 'number' ? String(t.semesterFees) : (typeof t.semesterFees === 'string' ? t.semesterFees : ''),
+                      admissionFee: typeof t.admissionFee === 'number' ? String(t.admissionFee) : (typeof t.admissionFee === 'string' ? t.admissionFee : ''),
                       total:     typeof t.total     === 'number' ? String(t.total)     : (typeof t.total     === 'string' ? t.total     : ''),
                     }))
                 : [],
@@ -133,7 +143,7 @@ export default function ShiftsEditor({ name, initialValue }: Props) {
       ? {
           ...s,
           groups: s.groups.map((g) => g.id === groupId
-            ? { ...g, tiers: [...g.tiers, { id: genId('ti'), gpa: '', waiver: '', credits: '', perCredit: '', total: '' }] }
+            ? { ...g, tiers: [...g.tiers, { id: genId('ti'), gpa: '', waiver: '', credits: '', perCredit: '', semesterFees: '', admissionFee: '', total: '' }] }
             : g),
         }
       : s));
@@ -148,7 +158,7 @@ export default function ShiftsEditor({ name, initialValue }: Props) {
         }
       : s));
   }
-  function updateTier(shiftId: string, groupId: string, tierId: string, field: 'gpa' | 'waiver' | 'credits' | 'perCredit' | 'total', val: string) {
+  function updateTier(shiftId: string, groupId: string, tierId: string, field: TierField, val: string) {
     setShifts(shifts.map((s) => s.id === shiftId
       ? {
           ...s,
@@ -184,6 +194,11 @@ export default function ShiftsEditor({ name, initialValue }: Props) {
         waiver: t.waiver,
         credits: Number(t.credits) || 0,
         perCredit: Number(t.perCredit) || 0,
+        // Omitted rather than zeroed when blank: a 0 here would read as
+        // "no fee" on the public table and would also switch that
+        // group into the postgraduate column layout.
+        ...(t.semesterFees.trim() !== '' ? { semesterFees: Number(t.semesterFees) || 0 } : {}),
+        ...(t.admissionFee.trim() !== '' ? { admissionFee: Number(t.admissionFee) || 0 } : {}),
         total:     Number(t.total)     || 0,
       })),
     })),
@@ -252,7 +267,7 @@ function ShiftCard({
   onReorderGroups: (orderedIds: string[]) => void;
   onAddTier: (groupId: string) => void;
   onRemoveTier: (groupId: string, tierId: string) => void;
-  onUpdateTier: (groupId: string, tierId: string, field: 'gpa' | 'waiver' | 'credits' | 'perCredit' | 'total', val: string) => void;
+  onUpdateTier: (groupId: string, tierId: string, field: TierField, val: string) => void;
   onReorderTiers: (groupId: string, orderedIds: string[]) => void;
 }) {
   return (
@@ -341,7 +356,7 @@ function GroupCard({
   onRemove: () => void;
   onAddTier: () => void;
   onRemoveTier: (tierId: string) => void;
-  onUpdateTier: (tierId: string, field: 'gpa' | 'waiver' | 'credits' | 'perCredit' | 'total', val: string) => void;
+  onUpdateTier: (tierId: string, field: TierField, val: string) => void;
   onReorderTiers: (orderedIds: string[]) => void;
 }) {
   return (
@@ -374,7 +389,7 @@ function GroupCard({
           getId={(t) => t.id}
           onReorder={onReorderTiers}
           renderItem={(tier) => (
-            <div className="bg-white border border-gray-200 rounded grid grid-cols-1 md:grid-cols-[1fr_90px_90px_120px_120px_auto] gap-1.5 p-2 items-start">
+            <div className="bg-white border border-gray-200 rounded grid grid-cols-1 md:grid-cols-[1fr_80px_80px_100px_100px_100px_110px_auto] gap-1.5 p-2 items-start">
               <Input label="GPA range" value={tier.gpa}
                      onChange={(v) => onUpdateTier(tier.id, 'gpa', v)}
                      placeholder="5.00 – 8.99" />
@@ -387,6 +402,15 @@ function GroupCard({
               <Input label="Per credit" value={tier.perCredit} inputMode="numeric"
                      onChange={(v) => onUpdateTier(tier.id, 'perCredit', v)}
                      placeholder="1628" />
+              {/* Postgraduate-only. Filling either replaces the public
+                  table's "Credits" column with these two; leave both
+                  blank for undergraduate tiers. */}
+              <Input label="Semester fees" value={tier.semesterFees} inputMode="numeric"
+                     onChange={(v) => onUpdateTier(tier.id, 'semesterFees', v)}
+                     placeholder="optional" />
+              <Input label="Admission fee" value={tier.admissionFee} inputMode="numeric"
+                     onChange={(v) => onUpdateTier(tier.id, 'admissionFee', v)}
+                     placeholder="optional" />
               <Input label="Total" value={tier.total} inputMode="numeric"
                      onChange={(v) => onUpdateTier(tier.id, 'total', v)}
                      placeholder="338048" />
