@@ -29,8 +29,9 @@ export default async function ClubListPage() {
         <div className="mx-auto max-w-3xl text-center mb-10 md:mb-14">
           <p className="text-[15px] md:text-[16px] leading-[1.85] text-gray-700">
             Sonargaon University hosts a vibrant network of student clubs that
-            shape campus life beyond the classroom — from performing arts and
-            sports to robotics, entrepreneurship, and social service.
+            shape campus life beyond the classroom — from the Department of
+            Law&rsquo;s own moot court and advocacy societies to performing
+            arts, sports, and social service.
           </p>
         </div>
 
@@ -43,7 +44,12 @@ export default async function ClubListPage() {
             {clubs.map((club) => (
               <article
                 key={club.id}
-                className="flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow overflow-hidden"
+                // Anchor target, so nav entries and shared links can
+                // point at one club: /student-society/club-list#law-club
+                id={club.slug}
+                // The sticky header would otherwise cover a jumped-to
+                // card; this offsets the scroll position by its height.
+                className="scroll-mt-28 flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow overflow-hidden"
               >
                 <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
                   <Image

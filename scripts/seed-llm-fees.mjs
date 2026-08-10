@@ -12,9 +12,13 @@
  *   Only for SU Students: Admission Fee 9500, Tuition Fee 1000,
  *                         Sem. Fee 6000 → 55540
  *
- * ONE CORRECTION TO THE SHEET: the waiver is published as 43%, not the
- * 46% printed above — confirmed by the department. Every other figure
- * is the sheet's own.
+ * CORRECTIONS TO THE SHEET, confirmed by the department:
+ *   · waiver    46%   → 43%
+ *   · perCredit 1080  → 1140   (both rows, including SU students)
+ * These two agree with each other and with the printed Fall-2025
+ * total:  2000 × (1 − 0.43) = 1140,  and
+ *         1140 × 36 + 12,500 + 12,000 = 65,540  ✓
+ * Every other figure is the sheet's own.
  *
  * NOTE ON THE ARITHMETIC — deliberately transcribed, not corrected.
  * The other rows on this sheet follow
@@ -68,10 +72,13 @@ const FEE = {
           tiers: [
             {
               gpa: '1 Year',
-              // The sheet prints 46; the department corrected this to 43.
+              // Sheet prints 46% / 1080; the department corrected these
+              // to 43% / 1140, which is also self-consistent:
+              //   2000 × (1 − 0.43)              = 1140
+              //   1140 × 36 + 12,500 + 12,000    = 65,540  ✓ matches
               waiver: '43%',
               credits: CREDITS,
-              perCredit: 1080,
+              perCredit: 1140,
               semesterFees: SEMESTER_FEES,
               admissionFee: ADMISSION_FEE,
               total: 65_540,
@@ -83,13 +90,20 @@ const FEE = {
           tiers: [
             {
               gpa: '1 Year',
-              waiver: '—',
+              waiver: '43%',
               credits: CREDITS,
-              perCredit: 1000,
+              perCredit: 1140,
               // The SU-student column on the sheet quotes its own
               // reduced admission and semester fees.
+              //
+              // NOTE: 1140 × 36 + 9,500 + 6,000 = 56,540, while the
+              // sheet prints 55,540 — a 1,000 gap. The printed total is
+              // kept as published; do not "fix" it here.
               semesterFees: 6_000,
               admissionFee: 9_500,
+              // The sheet prints this qualifier in parentheses beneath
+              // the SU-student admission fee.
+              admissionFeeNote: 'Tuition Fee-1000',
               total: 55_540,
             },
           ],
@@ -149,7 +163,13 @@ try {
     for (const g of sh.groups) {
       console.log(`    Group: ${g.background}`);
       for (const t of g.tiers) {
-        const computed = t.perCredit * CREDITS + ADMISSION_FEE + SEMESTER_FEES;
+        // Use the tier's own fees — the SU-student row carries reduced
+        // ones, so the shared constants would check it against the
+        // wrong figures.
+        const computed =
+          t.perCredit * CREDITS +
+          (t.admissionFee ?? ADMISSION_FEE) +
+          (t.semesterFees ?? SEMESTER_FEES);
         const note =
           computed === t.total
             ? 'matches the sheet formula'

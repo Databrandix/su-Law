@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { type ReactNode } from 'react';
 
 export type ProgramTab = {
   /** Stable key — the Program row id. */
@@ -15,23 +16,50 @@ export type ProgramTab = {
   panel?: ReactNode;
 };
 
+/** URL key holding the selected programme, e.g. ?program=LLM */
+const PARAM = 'program';
+
+/** Compare codes case- and punctuation-insensitively ("LL.M" ~ "llm"). */
+const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
 /**
  * Program selector for the tuition-fee tables.
  *
  * Every panel is server-rendered and stays in the document — only its
  * visibility is toggled. That keeps all eight fee tables crawlable and
  * findable with Ctrl+F while showing one at a time.
+ *
+ * The selection lives in the URL (?program=LLM) rather than in local
+ * state, so a refresh, a bookmark, or a shared link keeps the programme
+ * the reader was looking at instead of snapping back to the first tab.
  */
 export default function ProgramTabs({
   programs,
 }: {
   programs: readonly ProgramTab[];
 }) {
-  const [activeId, setActiveId] = useState<string>(programs[0]?.id ?? '');
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   if (programs.length === 0) return null;
 
-  const active = programs.find((p) => p.id === activeId) ?? programs[0];
+  const requested = searchParams.get(PARAM);
+  const active =
+    (requested
+      ? programs.find((p) => normalize(p.code) === normalize(requested))
+      : undefined) ?? programs[0];
+
+  function select(program: ProgramTab) {
+    const next = new URLSearchParams(searchParams.toString());
+    // The first programme is the default, so it needs no query string.
+    if (program.id === programs[0].id) next.delete(PARAM);
+    else next.set(PARAM, program.code);
+
+    const qs = next.toString();
+    // scroll: false keeps the reader where they are — the tab strip is
+    // usually already off the top of the viewport when they switch.
+    router.replace(qs ? `?${qs}` : '?', { scroll: false });
+  }
 
   return (
     <>
@@ -57,7 +85,7 @@ export default function ProgramTabs({
                 aria-controls={`panel-${p.id}`}
                 aria-selected={isActive}
                 title={`${p.tier} — ${p.name}`}
-                onClick={() => setActiveId(p.id)}
+                onClick={() => select(p)}
                 className={`rounded-full px-5 py-2.5 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-accent/40 ${
                   startsNewTier ? 'ml-3 md:ml-5' : ''
                 } ${

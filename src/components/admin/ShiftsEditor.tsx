@@ -32,6 +32,8 @@ type Tier = {
   // two; leaving both blank keeps the undergraduate five-column layout.
   semesterFees: string;
   admissionFee: string;
+  // Free text shown in parentheses under the admission fee.
+  admissionFeeNote: string;
   total: string;
 };
 /** Editable keys on a Tier — every field except its local id. */
@@ -82,6 +84,7 @@ function normalize(initial: unknown): Shift[] {
                       perCredit: typeof t.perCredit === 'number' ? String(t.perCredit) : (typeof t.perCredit === 'string' ? t.perCredit : ''),
                       semesterFees: typeof t.semesterFees === 'number' ? String(t.semesterFees) : (typeof t.semesterFees === 'string' ? t.semesterFees : ''),
                       admissionFee: typeof t.admissionFee === 'number' ? String(t.admissionFee) : (typeof t.admissionFee === 'string' ? t.admissionFee : ''),
+                      admissionFeeNote: typeof t.admissionFeeNote === 'string' ? t.admissionFeeNote : '',
                       total:     typeof t.total     === 'number' ? String(t.total)     : (typeof t.total     === 'string' ? t.total     : ''),
                     }))
                 : [],
@@ -143,7 +146,7 @@ export default function ShiftsEditor({ name, initialValue }: Props) {
       ? {
           ...s,
           groups: s.groups.map((g) => g.id === groupId
-            ? { ...g, tiers: [...g.tiers, { id: genId('ti'), gpa: '', waiver: '', credits: '', perCredit: '', semesterFees: '', admissionFee: '', total: '' }] }
+            ? { ...g, tiers: [...g.tiers, { id: genId('ti'), gpa: '', waiver: '', credits: '', perCredit: '', semesterFees: '', admissionFee: '', admissionFeeNote: '', total: '' }] }
             : g),
         }
       : s));
@@ -199,6 +202,7 @@ export default function ShiftsEditor({ name, initialValue }: Props) {
         // group into the postgraduate column layout.
         ...(t.semesterFees.trim() !== '' ? { semesterFees: Number(t.semesterFees) || 0 } : {}),
         ...(t.admissionFee.trim() !== '' ? { admissionFee: Number(t.admissionFee) || 0 } : {}),
+        ...(t.admissionFeeNote.trim() !== '' ? { admissionFeeNote: t.admissionFeeNote.trim() } : {}),
         total:     Number(t.total)     || 0,
       })),
     })),
@@ -389,7 +393,7 @@ function GroupCard({
           getId={(t) => t.id}
           onReorder={onReorderTiers}
           renderItem={(tier) => (
-            <div className="bg-white border border-gray-200 rounded grid grid-cols-1 md:grid-cols-[1fr_80px_80px_100px_100px_100px_110px_auto] gap-1.5 p-2 items-start">
+            <div className="bg-white border border-gray-200 rounded grid grid-cols-1 md:grid-cols-[1fr_75px_75px_95px_95px_95px_110px_105px_auto] gap-1.5 p-2 items-start">
               <Input label="GPA range" value={tier.gpa}
                      onChange={(v) => onUpdateTier(tier.id, 'gpa', v)}
                      placeholder="5.00 – 8.99" />
@@ -411,6 +415,9 @@ function GroupCard({
               <Input label="Admission fee" value={tier.admissionFee} inputMode="numeric"
                      onChange={(v) => onUpdateTier(tier.id, 'admissionFee', v)}
                      placeholder="optional" />
+              <Input label="…note" value={tier.admissionFeeNote}
+                     onChange={(v) => onUpdateTier(tier.id, 'admissionFeeNote', v)}
+                     placeholder="Tuition Fee-1000" />
               <Input label="Total" value={tier.total} inputMode="numeric"
                      onChange={(v) => onUpdateTier(tier.id, 'total', v)}
                      placeholder="338048" />

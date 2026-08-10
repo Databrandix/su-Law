@@ -875,6 +875,8 @@ const feeTierSchema = z.object({
   // setting either swaps the table's "Credits" column for these two.
   semesterFees: z.number().optional(),
   admissionFee: z.number().optional(),
+  // Qualifier printed under the admission fee, e.g. "Tuition Fee-1000".
+  admissionFeeNote: z.string().optional(),
   total:     z.number(),
 });
 
@@ -887,7 +889,9 @@ const feeShiftSchema = z.object({
   iconName:    z.string().min(1),
   name:        z.string().min(1),
   shiftLabel:  z.string().min(1),
-  description: z.string().min(1),
+  // Optional — the public table already collapses the line when blank,
+  // and not every shift has something to say beneath its name.
+  description: z.string().default(''),
   groups:      z.array(feeGroupSchema).default([]),
 });
 

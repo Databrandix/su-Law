@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import PageShell from '@/components/layout/PageShell';
 import Container from '@/components/ui/Container';
 import { getProgramFeeStructures, getPrograms, getPageHero } from '@/lib/identity';
@@ -31,6 +32,9 @@ type FeeTier = {
   // undergraduate tables keep their original five columns.
   semesterFees?: number;
   admissionFee?: number;
+  // Free-text line shown under the admission fee, for the qualifier the
+  // sheet prints in parentheses (e.g. "Tuition Fee-1000").
+  admissionFeeNote?: string;
   total: number;
 };
 type FeeGroup = { background: string; tiers: FeeTier[] };
@@ -66,6 +70,9 @@ function coerceTiers(v: unknown): FeeTier[] {
       perCredit:    typeof r.perCredit    === 'number' ? r.perCredit    : 0,
       semesterFees: typeof r.semesterFees === 'number' ? r.semesterFees : undefined,
       admissionFee: typeof r.admissionFee === 'number' ? r.admissionFee : undefined,
+      admissionFeeNote: typeof r.admissionFeeNote === 'string' && r.admissionFeeNote !== ''
+        ? r.admissionFeeNote
+        : undefined,
       total:        typeof r.total        === 'number' ? r.total        : 0,
     }))
     .filter((t) => t.gpa);
@@ -306,6 +313,11 @@ function FeeStructureBlock({ fs }: { fs: FeeStructureRow }) {
                                                   {tier.admissionFee != null
                                                     ? fmt(tier.admissionFee)
                                                     : '—'}
+                                                  {tier.admissionFeeNote && (
+                                                    <span className="block text-[11.5px] font-medium text-gray-500">
+                                                      ({tier.admissionFeeNote})
+                                                    </span>
+                                                  )}
                                                 </td>
                                               </>
                                             )}
@@ -384,6 +396,10 @@ export default async function TuitionFeesPage() {
       contentClassName="bg-gray-50 py-12 md:py-20"
     >
       <Container>
+        {/* ProgramTabs reads ?program= via useSearchParams, which Next
+            requires to sit inside a Suspense boundary or the whole route
+            opts out of static rendering. */}
+        <Suspense fallback={null}>
         <ProgramTabs
           programs={programs.map((p) => {
             const fs = feeStructures.find((f) => f.program.id === p.id);
@@ -396,6 +412,7 @@ export default async function TuitionFeesPage() {
             };
           })}
         />
+        </Suspense>
       </Container>
     </PageShell>
   );
