@@ -423,6 +423,22 @@ const activitiesArraySchema = z.array(
   }),
 );
 
+// Same shape, but the photo is optional: the club detail page falls
+// back to a gradient band with the activity icon when there is none,
+// and the societies have no activity photos yet. The editor serializes
+// a missing image as '', so allow the empty string rather than
+// requiring admins to upload before they can save.
+const optionalImageActivitiesArraySchema = z.array(
+  z.object({
+    iconName:      z.string().min(1),
+    imageUrl:      z.string().default(''),
+    imagePublicId: optionalNullableString,
+    category:      z.string().min(1),
+    title:         z.string().min(1),
+    description:   z.string().min(1),
+  }),
+);
+
 export const aboutBusinessClubUpdateSchema = z.object({
   heroTitle:                z.string().min(1).max(300),
   heroOverline:             optionalNullableString,
@@ -655,6 +671,44 @@ export const clubCreateSchema = z.object({
 });
 
 export const clubUpdateSchema = clubCreateSchema;
+
+/**
+ * Detail page (/student-society/club-list/<slug>) — edited from its own
+ * screen under About Pages, not from the club card form, so that the
+ * thirteen card-only clubs keep a short form. A null introHeading means
+ * the club has no page and renders as a card only.
+ */
+export const clubDetailSchema = z.object({
+  heroTitle:          optionalNullableString,
+  heroOverline:       optionalNullableString,
+  heroImageUrl:       optionalNullableString,
+  heroImagePublicId:  optionalNullableString,
+  introOverline:      optionalNullableString,
+  introHeading:       optionalNullableString,
+  introBody1:         optionalNullableString,
+  introBody2:         optionalNullableString,
+  introImageUrl:      optionalNullableString,
+  introImagePublicId: optionalNullableString,
+  // Same shapes the Business Club page uses, so the shared
+  // StatsEditor / ActivitiesEditor components serialize into them.
+  stats:              statsArraySchema.default([]),
+  activitiesOverline: optionalNullableString,
+  activitiesHeading:  optionalNullableString,
+  activities:         optionalImageActivitiesArraySchema.default([]),
+  networkOverline:          optionalNullableString,
+  networkHeading:           optionalNullableString,
+  networkBody:              optionalNullableString,
+  networkPrimaryCtaLabel:   optionalNullableString,
+  networkPrimaryCtaHref:    optionalNullableString,
+  networkSecondaryCtaLabel: optionalNullableString,
+  networkSecondaryCtaHref:  optionalNullableString,
+
+  // Contact strip above the footer.
+  contactHeading: optionalNullableString,
+  contactPhone:   optionalNullableString,
+  contactHours:   optionalNullableString,
+  contactEmail:   optionalNullableString,
+});
 
 // ─── FAQ ────────────────────────────────────────────────────────
 
@@ -1071,7 +1125,9 @@ export const newsletterSubscribeSchema = z.object({
 });
 
 // ─────────────────────────────────────────────────────────────────
-//  Business Club join application — public submit + admin status edit
+//  Club join application — public submit + admin status edit.
+//  Names keep the businessClubApplication prefix because that is the
+//  Prisma model they validate; the table predates multi-club support.
 // ─────────────────────────────────────────────────────────────────
 
 const mechaClubSemesterEnum = z.enum(['1', '2', '3', '4', '5', '6', '7', '8']);
@@ -1083,6 +1139,10 @@ export const businessClubApplicationCreateSchema = z.object({
   phone:      z.string().trim().min(1).max(50),
   semester:   mechaClubSemesterEnum,
   motivation: z.string().trim().min(1).max(2000),
+  // Which club the student picked in the popup's dropdown. The route
+  // resolves the slug against the Club table and stores the name it
+  // finds there, so a spoofed clubName can't reach the database.
+  clubSlug:   z.string().trim().min(1).max(160),
 });
 
 export const businessClubApplicationStatusEnum = z.enum([

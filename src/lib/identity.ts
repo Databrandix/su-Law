@@ -376,6 +376,42 @@ export const getClubs = cache(async () => {
   return prisma.club.findMany({ orderBy: { displayOrder: 'asc' } });
 });
 
+export const getClubBySlug = cache(async (slug: string) => {
+  return prisma.club.findUnique({ where: { slug } });
+});
+
+// Slugs of clubs that have detail-page content — drives
+// generateStaticParams for /student-society/club-list/[slug]. A club
+// with no introHeading is card-only and gets no page.
+export const getClubDetailSlugs = cache(async () => {
+  return prisma.club.findMany({
+    where: { introHeading: { not: null } },
+    select: { slug: true },
+  });
+});
+
+// Dropdown options for the "Join a Club" popup — the department's own
+// societies only. The other clubs on /student-society/club-list are
+// university-wide bodies the department does not take applications for,
+// so they stay listed but are not offered here. Having a detail page is
+// what marks a club as the department's own.
+//
+// `extraSlug` lets a page add one club outside that set: the inherited
+// /about/business-club page needs its own club selectable even though
+// it is not a Law society, or its form could not be submitted.
+export const getClubOptions = cache(async (extraSlug?: string) => {
+  return prisma.club.findMany({
+    where: {
+      OR: [
+        { introHeading: { not: null } },
+        ...(extraSlug ? [{ slug: extraSlug }] : []),
+      ],
+    },
+    orderBy: { displayOrder: 'asc' },
+    select: { slug: true, name: true },
+  });
+});
+
 export const getFaqs = cache(async () => {
   return prisma.faq.findMany({ orderBy: { displayOrder: 'asc' } });
 });

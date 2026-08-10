@@ -38,11 +38,14 @@ const staticRoutes: { path: string; priority: number; changeFrequency: 'weekly' 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const [facultyRows, eventRows, newsRows, programRows] = await Promise.all([
+  const [facultyRows, eventRows, newsRows, programRows, clubRows] = await Promise.all([
     prisma.faculty.findMany({ select: { slug: true } }),
     prisma.event.findMany({ select: { slug: true } }),
     prisma.news.findMany({ select: { slug: true } }),
     prisma.program.findMany({ where: { slug: { not: null } }, select: { slug: true } }),
+    // Only clubs with detail content have a page — the rest are cards
+    // on the listing and would 404 here.
+    prisma.club.findMany({ where: { introHeading: { not: null } }, select: { slug: true } }),
   ]);
 
   const statics: MetadataRoute.Sitemap = staticRoutes.map(({ path, priority, changeFrequency }) => ({
@@ -82,5 +85,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  return [...statics, ...programPages, ...facultyPages, ...eventPages, ...newsPages];
+  const clubPages: MetadataRoute.Sitemap = clubRows.map((c) => ({
+    url: `${BASE_URL}/student-society/club-list/${c.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.5,
+  }));
+
+  return [
+    ...statics,
+    ...programPages,
+    ...facultyPages,
+    ...eventPages,
+    ...newsPages,
+    ...clubPages,
+  ];
 }

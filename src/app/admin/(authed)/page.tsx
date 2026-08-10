@@ -68,7 +68,7 @@ export default async function DashboardHome() {
   ] = await Promise.all([
     prisma.program.count(),
     prisma.researchArea.count(),
-    prisma.faculty.count(),
+    prisma.faculty.count(),
     prisma.news.count(),
     prisma.event.count(),
     prisma.notice.count(),
@@ -126,7 +126,7 @@ export default async function DashboardHome() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
           <StatCard label="Total Programs" value={programsCount} />
           <StatCard label="Total Research Areas" value={researchAreasCount} />
-          <StatCard label="Total Faculty" value={facultyCount} />
+          <StatCard label="Total Faculty" value={facultyCount} />
           <StatCard label="News Articles" value={newsCount} />
           <StatCard label="Events" value={eventCount} />
           <StatCard label="Notices" value={noticeCount} />
@@ -238,11 +238,19 @@ export default async function DashboardHome() {
             title="About — Mission & Vision"
             desc="Mission card + Vision card content"
           />
+          {/* The two Law societies replace the Business Club card the
+              template shipped with; each edits one club's detail page. */}
           <ActionCard
-            href="/admin/about-business-club"
+            href="/admin/about-club/moot-court-society"
             icon={Info}
-            title="About — Business Club"
-            desc="Hero, intro, stats, activities, network"
+            title="About — SU Moot Court Society"
+            desc="Hero, intro, figures, activities, closing panel"
+          />
+          <ActionCard
+            href="/admin/about-club/law-club"
+            icon={Info}
+            title="About — SU Law Club"
+            desc="Hero, intro, figures, activities, closing panel"
           />
           <ActionCard
             href="/admin/news"

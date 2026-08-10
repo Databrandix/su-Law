@@ -13,14 +13,15 @@ import {
   Clock,
   ChevronDown,
   ChevronUp,
+  Users2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAdminListItems } from '@/lib/hooks/useAdminListItems';
 import { useConfirm } from '@/components/admin/ConfirmDialogProvider';
 import {
-  deleteBusinessClubApplicationAction,
-  updateBusinessClubApplicationStatusAction,
-} from '@/lib/admin-actions/business-club-applications';
+  deleteClubApplicationAction,
+  updateClubApplicationStatusAction,
+} from '@/lib/admin-actions/club-applications';
 
 type ApplicationRow = {
   id:          string;
@@ -31,6 +32,8 @@ type ApplicationRow = {
   semester:    string;
   motivation:  string;
   status:      string;
+  // Null on rows submitted before applications recorded a club.
+  clubName:    string | null;
   submittedAt: string;
 };
 
@@ -56,6 +59,10 @@ export default function ApplicationsList({ items: initialItems }: { items: Appli
   const confirm = useConfirm();
   const { items, removeById } = useAdminListItems(initialItems);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  // '' = every club. Built from the rows themselves rather than the
+  // Club table so a society that has been renamed or removed still has
+  // a filter entry for the applications it already received.
+  const [clubFilter, setClubFilter] = useState('');
   // Track per-row local status so the badge updates immediately when
   // the admin clicks Approve/Reject without waiting for a router.refresh.
   const [statusOverrides, setStatusOverrides] = useState<Record<string, string>>({});
@@ -65,7 +72,7 @@ export default function ApplicationsList({ items: initialItems }: { items: Appli
   }
 
   async function handleStatus(id: string, next: 'pending' | 'approved' | 'rejected') {
-    const res = await updateBusinessClubApplicationStatusAction(id, next);
+    const res = await updateClubApplicationStatusAction(id, next);
     if (res.ok) {
       setStatusOverrides((prev) => ({ ...prev, [id]: next }));
       toast.success(`Marked as ${next}`);
@@ -83,7 +90,7 @@ export default function ApplicationsList({ items: initialItems }: { items: Appli
       variant: 'danger',
     });
     if (!ok) return;
-    const res = await deleteBusinessClubApplicationAction(id);
+    const res = await deleteClubApplicationAction(id);
     if (res.ok) {
       removeById(id);
       toast.success('Application removed');
@@ -102,9 +109,30 @@ export default function ApplicationsList({ items: initialItems }: { items: Appli
     );
   }
 
+  const clubNames = [...new Set(items.map((r) => r.clubName).filter(Boolean))].sort() as string[];
+  const visible = clubFilter ? items.filter((r) => r.clubName === clubFilter) : items;
+
   return (
+    <>
+      {clubNames.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap mb-3">
+          <FilterChip label="All clubs" active={clubFilter === ''} onClick={() => setClubFilter('')}
+                      count={items.length} />
+          {clubNames.map((name) => (
+            <FilterChip key={name} label={name} active={clubFilter === name}
+                        onClick={() => setClubFilter(name)}
+                        count={items.filter((r) => r.clubName === name).length} />
+          ))}
+        </div>
+      )}
+
+      {visible.length === 0 ? (
+        <div className="text-center py-12 bg-white border border-dashed border-gray-300 rounded-lg">
+          <p className="text-gray-500 text-sm">No applications for {clubFilter}.</p>
+        </div>
+      ) : (
     <ul className="space-y-2">
-      {items.map((row) => {
+      {visible.map((row) => {
         const status = statusOf(row);
         const style = STATUS_STYLES[status] ?? STATUS_STYLES.pending;
         const expanded = expandedId === row.id;
@@ -117,6 +145,12 @@ export default function ApplicationsList({ items: initialItems }: { items: Appli
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-2">
                   <span className="font-semibold text-gray-900">{row.fullName}</span>
+                  {row.clubName && (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold border border-accent/30 bg-accent/10 text-accent rounded px-2 py-0.5">
+                      <Users2 size={11} />
+                      {row.clubName}
+                    </span>
+                  )}
                   <span
                     className={`text-[10px] uppercase tracking-wider font-bold border rounded px-2 py-0.5 ${style.cls}`}
                   >
@@ -204,5 +238,27 @@ export default function ApplicationsList({ items: initialItems }: { items: Appli
         );
       })}
     </ul>
+      )}
+    </>
+  );
+}
+
+function FilterChip({
+  label, active, onClick, count,
+}: { label: string; active: boolean; onClick: () => void; count: number }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex items-center gap-1.5 text-xs font-medium rounded-full border px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-accent/40 ${
+        active
+          ? 'bg-primary text-white border-primary'
+          : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+      }`}
+    >
+      {label}
+      <span className={active ? 'text-white/70' : 'text-gray-400'}>{count}</span>
+    </button>
   );
 }

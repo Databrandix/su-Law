@@ -1,5 +1,6 @@
 import Image from 'next/image';
-import { Users } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, Users } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import Container from '@/components/ui/Container';
 import { getClubs, getPageHero } from '@/lib/identity';
@@ -77,6 +78,21 @@ export default async function ClubListPage() {
                   <p className="text-[14px] leading-[1.7] text-gray-700 mt-1">
                     {club.description}
                   </p>
+
+                  {/* Only clubs with detail content have a page; the
+                      rest stay card-only and show no link. */}
+                  {club.introHeading && (
+                    <Link
+                      href={`/student-society/club-list/${club.slug}`}
+                      className="group/link mt-auto inline-flex items-center gap-1.5 pt-2 text-[13px] font-semibold text-primary transition-colors hover:text-accent"
+                    >
+                      Learn more
+                      <ArrowRight
+                        size={14}
+                        className="transition-transform group-hover/link:translate-x-0.5"
+                      />
+                    </Link>
+                  )}
                 </div>
               </article>
             ))}

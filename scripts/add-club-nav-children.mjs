@@ -8,9 +8,8 @@
  *                     ▸ Sonargaon University Moot Court Society (SUMCS)
  *                     ▸ Sonargaon University Law Club (SULC)
  *
- * Each links to its card's anchor on the club-list page
- * (/student-society/club-list#law-club); the cards carry matching `id`
- * attributes.
+ * Each links to the club's own page
+ * (/student-society/club-list/law-club).
  *
  * Only the Law societies are listed, not all 15 clubs — the rest are
  * university-wide and already one click away via "Club list".
@@ -60,8 +59,11 @@ try {
       console.log(`!! no club with slug "${slug}" — skipped`);
       continue;
     }
-    const href = `/student-society/club-list#${club.slug}`;
-    const existing = group.items.find((x) => x.href === href);
+    const href = `/student-society/club-list/${club.slug}`;
+    // Match the old anchor form too, so a previously-created item is
+    // updated rather than duplicated.
+    const oldHref = `/student-society/club-list#${club.slug}`;
+    const existing = group.items.find((x) => x.href === href || x.href === oldHref);
     plan.push({
       existingId: existing?.id ?? null,
       // Was it wrongly nested under "Club list"? Then it needs lifting.
@@ -88,8 +90,10 @@ try {
       if (c.existingId) {
         await prisma.mainNavItem.update({
           where: { id: c.existingId },
-          // parentId: null lifts it to the top level of the dropdown.
-          data: { name: c.name, parentId: null, displayOrder: c.displayOrder },
+          // parentId: null lifts it to the top level of the dropdown;
+          // href is rewritten so items created against the old anchor
+          // form now point at the club's own page.
+          data: { name: c.name, href: c.href, parentId: null, displayOrder: c.displayOrder },
         });
       } else {
         await prisma.mainNavItem.create({

@@ -15,11 +15,11 @@ async function requireAuth(): Promise<ActionResult | null> {
 }
 
 function revalidateSurfaces() {
-  revalidatePath('/admin/business-club-applications');
+  revalidatePath('/admin/club-applications');
   revalidatePath('/admin');
 }
 
-export async function updateBusinessClubApplicationStatusAction(
+export async function updateClubApplicationStatusAction(
   id: string,
   rawStatus: string,
 ): Promise<ActionResult> {
@@ -53,7 +53,7 @@ export async function updateBusinessClubApplicationStatusAction(
   return { ok: true };
 }
 
-export async function deleteBusinessClubApplicationAction(
+export async function deleteClubApplicationAction(
   id: string,
 ): Promise<ActionResult> {
   const denied = await requireAuth();

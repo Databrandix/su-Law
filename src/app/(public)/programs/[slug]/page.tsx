@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -13,8 +12,6 @@ import Container from '@/components/ui/Container';
 import { DynamicLucideIcon } from '@/components/ui/DynamicLucideIcon';
 import { getProgramBySlug, getProgramSlugs, getPageHero } from '@/lib/identity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
-
-const DEFAULT_PROGRAM_IMAGE = '/assets/program-undergraduate.webp';
 
 export async function generateStaticParams() {
   const slugs = await getProgramSlugs();
@@ -87,27 +84,31 @@ export default async function ProgramDetailPage({
       contentClassName="bg-gray-50 py-12 md:py-20"
     >
       <Container>
-        {/* ───── Overview: prose beside the program image ───── */}
-        <section className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start mb-14 md:mb-20">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
+        {/* ───── Overview ─────
+            Centered, narrow column — matches the "At a Glance" /
+            Specializations layout the chair asked to follow, so this
+            page reads as one consistent centered layout rather than a
+            left-aligned block on top of a centered one below. */}
+        <section className="mb-14 md:mb-20 mx-auto max-w-7xl text-center">
+            <div className="flex items-center justify-center gap-3 mb-3">
               <span className="h-[1.5px] w-10 bg-accent/40" />
               <span className="text-accent text-[10px] font-bold uppercase tracking-[0.2em]">
                 Program Overview
               </span>
+              <span className="h-[1.5px] w-10 bg-accent/40" />
             </div>
             <h2 className="font-display text-2xl md:text-3xl font-bold text-primary leading-tight mb-5">
               {program.degreeCode}
             </h2>
 
             {paragraphs.length > 0 ? (
-              <div className="space-y-5 text-[15px] md:text-[16px] leading-[1.85] text-gray-800 text-justify">
+              <div className="space-y-5 text-[15px] md:text-[16px] leading-[1.85] text-gray-800">
                 {paragraphs.map((p, i) => (
                   <p key={i} dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }} />
                 ))}
               </div>
             ) : (
-              <p className="text-[15px] md:text-[16px] leading-[1.85] text-gray-800 text-justify">
+              <p className="text-[15px] md:text-[16px] leading-[1.85] text-gray-800">
                 {program.description}
               </p>
             )}
@@ -122,19 +123,6 @@ export default async function ProgramDetailPage({
                 </span>
               </div>
             )}
-          </div>
-
-          <div className="relative overflow-hidden rounded-2xl shadow-lg lg:sticky lg:top-32">
-            <Image
-              src={program.imageUrl ?? DEFAULT_PROGRAM_IMAGE}
-              alt={program.programName}
-              width={840}
-              height={630}
-              sizes="(min-width: 1024px) 420px, 100vw"
-              priority
-              className="block h-auto w-full object-cover"
-            />
-          </div>
         </section>
 
         {/* ───── Key facts — reuses the fee structure's stat cards ─────
@@ -143,8 +131,8 @@ export default async function ProgramDetailPage({
             The shared frame reads as a single spec sheet and removes
             the ragged gaps the old separate cards left. */}
         {stats.length > 0 && (
-          <section className="mb-14 md:mb-20">
-            <SectionHeader Icon={Layers} title="At a Glance" />
+          <section className="mb-14 md:mb-20 mx-auto max-w-7xl">
+            <SectionHeader Icon={Layers} title="At a Glance" centered />
             <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04),0_12px_32px_-12px_rgba(43,49,117,0.16)]">
               <div className="grid divide-y divide-gray-100 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4">
                 {stats.map((stat, i) => (
@@ -166,7 +154,7 @@ export default async function ProgramDetailPage({
                     <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400">
                       {stat.label}
                     </div>
-                    <div className="mt-1.5 font-display text-[26px] font-bold leading-none tracking-tight text-primary lg:text-[28px]">
+                    <div className="mt-1.5 whitespace-nowrap font-display text-[26px] font-bold leading-none tracking-tight text-primary lg:text-[28px]">
                       {stat.value}
                     </div>
                   </div>
@@ -177,28 +165,34 @@ export default async function ProgramDetailPage({
         )}
 
         {/* ───── Specializations ─────
+            Same centered heading + bordered-panel treatment as "At a
+            Glance" above, so the two sections read as one consistent
+            centered layout rather than a centered panel followed by a
+            loose grid on the bare page background.
             Auto-fit tracks so a trailing row of 1–2 items stretches to
             fill the width instead of leaving a hole on the right, which
             is what made the old fixed 3-column grid look unfinished. */}
         {program.specializations.length > 0 && (
-          <section className="mb-14 md:mb-20">
-            <SectionHeader Icon={GraduationCap} title="Specializations" />
-            <div className="grid gap-3 sm:gap-4 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
-              {program.specializations.map((spec) => (
-                <div
-                  key={spec}
-                  className="group relative flex items-center gap-3.5 overflow-hidden rounded-xl border border-gray-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-[0_12px_28px_-12px_rgba(204,21,121,0.28)]"
-                >
-                  {/* Left accent bar, revealed on hover. */}
-                  <span className="absolute inset-y-0 left-0 w-1 origin-top scale-y-0 bg-gradient-to-b from-primary to-accent transition-transform duration-300 group-hover:scale-y-100" />
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/8 text-accent transition-colors group-hover:bg-accent group-hover:text-white">
-                    <CheckCircle2 size={18} />
-                  </span>
-                  <span className="text-[15px] font-semibold leading-snug text-primary">
-                    {spec}
-                  </span>
-                </div>
-              ))}
+          <section className="mb-14 md:mb-20 mx-auto max-w-7xl">
+            <SectionHeader Icon={GraduationCap} title="Specializations" centered />
+            <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04),0_12px_32px_-12px_rgba(43,49,117,0.16)] sm:p-6">
+              <div className="grid gap-3 sm:gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+                {program.specializations.map((spec) => (
+                  <div
+                    key={spec}
+                    className="group relative flex items-center gap-3.5 overflow-hidden rounded-xl border border-gray-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-[0_12px_28px_-12px_rgba(204,21,121,0.28)]"
+                  >
+                    {/* Left accent bar, revealed on hover. */}
+                    <span className="absolute inset-y-0 left-0 w-1 origin-top scale-y-0 bg-gradient-to-b from-primary to-accent transition-transform duration-300 group-hover:scale-y-100" />
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/8 text-accent transition-colors group-hover:bg-accent group-hover:text-white">
+                      <CheckCircle2 size={18} />
+                    </span>
+                    <span className="text-[15px] font-semibold leading-snug text-primary">
+                      {spec}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
@@ -235,10 +229,30 @@ export default async function ProgramDetailPage({
 function SectionHeader({
   Icon,
   title,
+  centered = false,
 }: {
   Icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
   title: string;
+  /** Icon + title centered with a rule on both sides, matching the
+   * centered Overview section above. Default keeps the original
+   * left-anchored, rule-to-the-edge treatment. */
+  centered?: boolean;
 }) {
+  if (centered) {
+    return (
+      <div className="mb-6 flex items-center justify-center gap-4 md:mb-8">
+        <span className="hidden h-px flex-1 max-w-16 bg-gray-200 sm:block" />
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-white shadow-[0_6px_16px_-6px_rgba(43,49,117,0.6)]">
+          <Icon size={20} strokeWidth={1.75} />
+        </div>
+        <h2 className="font-display text-[22px] font-bold leading-tight tracking-tight text-primary md:text-[26px]">
+          {title}
+        </h2>
+        <span className="hidden h-px flex-1 max-w-16 bg-gray-200 sm:block" />
+      </div>
+    );
+  }
+
   // Icon and title sit on one line with a rule running to the right
   // edge, so the heading anchors the section instead of floating as a
   // stacked centre badge above it.

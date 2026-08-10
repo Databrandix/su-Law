@@ -3,9 +3,9 @@ import { prisma } from '@/lib/db';
 import { getSession } from '@/lib/auth-server';
 import ApplicationsList from './ApplicationsList';
 
-export const metadata = { title: 'Business Club — Applications' };
+export const metadata = { title: 'Club Applications' };
 
-export default async function BusinessClubApplicationsPage() {
+export default async function ClubApplicationsPage() {
   const session = await getSession();
   if (!session?.user) redirect('/admin/login');
 
@@ -19,12 +19,11 @@ export default async function BusinessClubApplicationsPage() {
     <div className="space-y-6 max-w-5xl">
       <header>
         <h1 className="text-2xl font-display font-bold text-gray-900">
-          Business Club — Applications
+          Club Applications
         </h1>
         <p className="mt-1 text-sm text-gray-500">
-          Join applications submitted via the public{' '}
-          <code className="font-mono">/about/business-club</code> popup form.{' '}
-          {applications.length} total
+          Join applications submitted via the popup form on each club&apos;s
+          page. {applications.length} total
           {pendingCount > 0 ? ` · ${pendingCount} pending review` : ''}.
         </p>
       </header>
@@ -39,6 +38,7 @@ export default async function BusinessClubApplicationsPage() {
           semester:    a.semester,
           motivation:  a.motivation,
           status:      a.status,
+          clubName:    a.clubName,
           submittedAt: a.submittedAt.toISOString(),
         }))}
       />

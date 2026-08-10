@@ -58,7 +58,16 @@ export default function ClubsList({ items: initialItems }: { items: Club[] }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={c.imageUrl} alt="" className="w-14 h-12 rounded bg-gray-50 border border-gray-200 object-cover shrink-0" />
             <div className="min-w-0">
-              <div className="font-medium text-gray-900 truncate">{c.name}</div>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-medium text-gray-900 truncate">{c.name}</span>
+                {/* Only clubs with intro content have a page of their
+                    own; without this the rows look identical. */}
+                {c.introHeading && (
+                  <span className="shrink-0 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent">
+                    Has page
+                  </span>
+                )}
+              </div>
               <div className="text-xs text-gray-500 truncate">
                 <span className="font-mono">{c.slug}</span> · {c.abbreviation}
               </div>

@@ -5,7 +5,7 @@ import { businessClubApplicationCreateSchema } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 // Honeypot field name — must match the hidden input in
-// JoinBusinessClubModal. Real users never fill it; bots fill all inputs.
+// JoinClubModalButton. Real users never fill it; bots fill all inputs.
 const HONEYPOT_FIELD = 'website';
 
 function getClientIp(request: NextRequest): string | null {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   // Dedicated namespace so the bucket is not shared with the
   // contact form or the newsletter signup.
-  const rateLimitKey = `business-club-apply:${ip ?? 'no-ip'}`;
+  const rateLimitKey = `club-apply:${ip ?? 'no-ip'}`;
   const limit = checkRateLimit(rateLimitKey);
   if (!limit.allowed) {
     const retryAfter = Math.max(1, Math.ceil((limit.resetMs - Date.now()) / 1000));
@@ -65,12 +65,30 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Resolve the club server-side rather than trusting a posted name:
+  // the slug must match a real club, and the name stored is the one in
+  // the database. An unknown slug is a 400 so a stale cached page can't
+  // silently file applications against a club that no longer exists.
+  const { clubSlug, ...applicant } = parsed.data;
+  const club = await prisma.club.findUnique({
+    where: { slug: clubSlug },
+    select: { slug: true, name: true },
+  });
+  if (!club) {
+    return NextResponse.json(
+      { error: 'That club is no longer accepting applications.' },
+      { status: 400 },
+    );
+  }
+
   try {
     await prisma.businessClubApplication.create({
       data: {
-        ...parsed.data,
+        ...applicant,
         // Normalize email so duplicates only differ by case still group.
-        email: parsed.data.email.toLowerCase(),
+        email: applicant.email.toLowerCase(),
+        clubSlug: club.slug,
+        clubName: club.name,
         ipAddress: ip,
         userAgent: userAgent ?? null,
       },
@@ -82,7 +100,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  revalidatePath('/admin/business-club-applications');
+  revalidatePath('/admin/club-applications');
   revalidatePath('/admin');
 
   return NextResponse.json({ ok: true });

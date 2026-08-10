@@ -757,6 +757,57 @@ model Club {
   imageUrl      String
   imagePublicId String?
   displayOrder  Int
+
+  // ── Detail page (/student-society/club-list/[slug]) ──────────────
+  // All optional. A club with no `introHeading` has no detail page and
+  // renders as a card only, exactly as before — so the 13 inherited
+  // university clubs are unaffected until someone fills these in.
+  //
+  // Mirrors AboutBusinessClub's section layout (intro + stats,
+  // activities, closing panel) so every club page reads the same, but
+  // lives on the Club row instead of a per-club singleton table.
+
+  // Hero — falls back to `name` / `imageUrl` when unset.
+  heroTitle          String?
+  heroOverline       String?
+  heroImageUrl       String?
+  heroImagePublicId  String?
+
+  // Intro
+  introOverline      String?
+  // Allows inline HTML (e.g. <span class="text-gradient">), rendered
+  // through sanitizeHtml — same trust model as AboutBusinessClub.
+  introHeading       String?
+  introBody1         String?  @db.Text
+  introBody2         String?  @db.Text
+  introImageUrl      String?
+  introImagePublicId String?
+
+  // [{ value, label }] — the small figures under the intro copy.
+  stats              Json?
+
+  // [{ iconName, imageUrl, imagePublicId?, category, title, description }]
+  activities         Json?
+  activitiesOverline String?
+  activitiesHeading  String?
+
+  // Closing panel. Unlike the Business Club's, its primary CTA is a
+  // plain link (no application form), so both CTAs carry an href.
+  networkOverline         String?
+  networkHeading          String?
+  networkBody             String?  @db.Text
+  networkPrimaryCtaLabel  String?
+  networkPrimaryCtaHref   String?
+  networkSecondaryCtaLabel String?
+  networkSecondaryCtaHref  String?
+
+  // Contact strip above the footer — the same two-card template the
+  // /contact page uses. A card with no value simply does not render.
+  contactHeading String?
+  contactPhone   String?
+  contactHours   String?
+  contactEmail   String?
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -1450,6 +1501,13 @@ model BusinessClubApplication {
   phone       String
   semester    String                     // '1'..'8' (stored String for forward flex)
   motivation  String   @db.Text
+  // Which society the student applied to. Deliberately not a relation:
+  // deleting a club must not delete the applications sent to it, and
+  // the admin list still has to name the club afterwards — hence the
+  // denormalized clubName alongside the slug. Nullable for the rows
+  // that predate multi-club applications.
+  clubSlug    String?
+  clubName    String?
   // status — 'pending' | 'approved' | 'rejected'. Zod-validated;
   // String for forward flexibility (same as ContactSubmission.status).
   status      String   @default("pending")
@@ -1462,6 +1520,7 @@ model BusinessClubApplication {
 
   @@index([status, submittedAt])
   @@index([submittedAt])
+  @@index([clubSlug, submittedAt])
   @@map("business_club_application")
 }
 

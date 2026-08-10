@@ -46,7 +46,6 @@ import {
   Building,
   Rocket,
   ShieldCheck,
-  Wrench,
 } from 'lucide-react';
 import { useConfirm } from './ConfirmDialogProvider';
 
@@ -82,7 +81,12 @@ const ABOUT_PAGES_NAV: NavItem[] = [
   { href: '/admin/about-overview',        label: 'Overview',         icon: Info },
   { href: '/admin/about-mission-vision',  label: 'Mission & Vision', icon: Info },
   { href: '/admin/about-department-layout', label: 'Department Layout', icon: Info },
-  { href: '/admin/about-business-club',      label: 'Business Club',       icon: Info },
+  // The two Law societies replace the Business Club page the template
+  // shipped with. Each edits one club's detail page, addressed by slug;
+  // the club's card row is edited under Student Society → Clubs. The
+  // Business Club route and editor still exist, just unlinked.
+  { href: '/admin/about-club/moot-court-society', label: 'SU Moot Court Society', icon: Trophy },
+  { href: '/admin/about-club/law-club',           label: 'SU Law Club',           icon: Users2 },
 ];
 
 
@@ -472,14 +476,14 @@ export default function Sidebar({
           )}
         </Link>
 
-        {/* Business Club join applications — operational inbox, mirrors
-            the Contact Submissions placement (no badge wired yet). */}
+        {/* Club join applications — operational inbox, mirrors the
+            Contact Submissions placement (no badge wired yet). */}
         <Link
-          href="/admin/business-club-applications"
-          className={linkClass(!!pathname?.startsWith('/admin/business-club-applications'))}
+          href="/admin/club-applications"
+          className={linkClass(!!pathname?.startsWith('/admin/club-applications'))}
         >
-          <Wrench size={16} />
-          Business Club Applications
+          <ClipboardList size={16} />
+          Club Applications
         </Link>
 
         {/* Newsletter — page CMS + subscriber list. Grouped together so

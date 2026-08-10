@@ -2,10 +2,10 @@ import Image from 'next/image';
 import { ArrowRight, Network } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import Container from '@/components/ui/Container';
-import { getAboutBusinessClub } from '@/lib/identity';
+import { getAboutBusinessClub, getClubOptions } from '@/lib/identity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { DynamicLucideIcon } from '@/components/ui/DynamicLucideIcon';
-import JoinBusinessClubButton from './JoinBusinessClubButton';
+import JoinClubModalButton from '@/components/forms/JoinClubModalButton';
 
 export const metadata = {
   title: 'Business Club — Department of Business Administration',
@@ -54,7 +54,12 @@ function coerceActivities(v: unknown): ActivityRow[] {
 }
 
 export default async function BusinessClubPage() {
-  const row = await getAboutBusinessClub();
+  const [row, clubOptions] = await Promise.all([
+    getAboutBusinessClub(),
+    // 'business' is not a Law society, so it is not in the default
+    // dropdown set — added explicitly here so this page's own form works.
+    getClubOptions('business'),
+  ]);
   if (!row) {
     throw new Error(
       'AboutBusinessClub row missing (id="singleton"). Create it from the admin panel.',
@@ -225,8 +230,14 @@ export default async function BusinessClubPage() {
                   instead of linking out — chair's request. Label still
                   comes from the DB so admin can rename via
                   /admin/about-business-club; networkPrimaryCtaHref is
-                  intentionally unused for this CTA now. */}
-              <JoinBusinessClubButton label={row.networkPrimaryCtaLabel} />
+                  intentionally unused for this CTA now. Shares the modal
+                  with the society pages, so the club dropdown defaults
+                  to the Business Club here. */}
+              <JoinClubModalButton
+                label={row.networkPrimaryCtaLabel}
+                clubs={clubOptions}
+                defaultClubSlug="business"
+              />
               {row.networkSecondaryCtaLabel && row.networkSecondaryCtaHref && (
                 <a
                   href={row.networkSecondaryCtaHref}

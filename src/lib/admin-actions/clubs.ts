@@ -2,8 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { getSession } from '@/lib/auth-server';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import { clubCreateSchema, clubUpdateSchema } from '@/lib/validation';
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -30,6 +33,8 @@ function revalidateClubSurfaces() {
   revalidatePath('/', 'layout');
 }
 
+// The card row only. Detail-page fields are edited on their own screen
+// (updateClubDetailAction below), so most clubs keep a short form.
 function readClubRow(formData: FormData) {
   return {
     slug:          getStr(formData, 'slug'),

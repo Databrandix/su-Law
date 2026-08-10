@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Users, X as XIcon, CheckCircle2, Loader2 } from 'lucide-react';
 
+// Honeypot field name — must match HONEYPOT_FIELD in the apply route.
 const HONEYPOT_NAME = 'website';
+
+export type ClubOption = { slug: string; name: string };
 
 type FormState = {
   fullName:   string;
@@ -13,9 +16,10 @@ type FormState = {
   phone:      string;
   semester:   string;
   motivation: string;
+  clubSlug:   string;
 };
 
-const EMPTY: FormState = {
+const EMPTY: Omit<FormState, 'clubSlug'> = {
   fullName:   '',
   studentId:  '',
   email:      '',
@@ -24,31 +28,50 @@ const EMPTY: FormState = {
   motivation: '',
 };
 
-export default function JoinBusinessClubButton({ label }: { label: string }) {
+/**
+ * Join-a-club popup, shared by every society page.
+ *
+ * `clubs` is the full dropdown list and `defaultClubSlug` preselects the
+ * society whose page the button sits on — so a student who lands on the
+ * Moot Court page and clicks Join does not have to pick it again, but
+ * can still switch to another club without navigating away.
+ */
+export default function JoinClubModalButton({
+  label,
+  clubs,
+  defaultClubSlug,
+}: {
+  label: string;
+  clubs: ClubOption[];
+  defaultClubSlug?: string;
+}) {
+  // Preselect the current page's club when it is in the list; otherwise
+  // leave the dropdown on its "choose one" placeholder.
+  const initialSlug =
+    defaultClubSlug && clubs.some((c) => c.slug === defaultClubSlug)
+      ? defaultClubSlug
+      : '';
+
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState<FormState>(EMPTY);
+  const [form, setForm] = useState<FormState>({ ...EMPTY, clubSlug: initialSlug });
   const [honeypot, setHoneypot] = useState('');
 
-  // Reset transient state when the modal closes so a re-open shows a
-  // clean form (unless the user just submitted — keep the success
-  // confirmation visible until they explicitly close).
+  const chosenClub = clubs.find((c) => c.slug === form.clubSlug);
+
   function close() {
     if (pending) return;
     setOpen(false);
     setTimeout(() => {
-      // Defer reset so the exit animation (if any) doesn't flash the
-      // form back in while the modal is closing.
       setSubmitted(false);
-      setForm(EMPTY);
+      setForm({ ...EMPTY, clubSlug: initialSlug });
       setHoneypot('');
     }, 200);
   }
 
-  // Scroll lock only — chair requested that ONLY the X button closes
-  // the modal. Backdrop click + Escape are intentionally disabled so
-  // a partially-filled form can't be lost to an accidental tap.
+  // Scroll lock only — closing is via the X / Cancel buttons so a
+  // partially-filled form can't be lost to a stray backdrop tap.
   useEffect(() => {
     if (!open) return;
     const prevOverflow = document.body.style.overflow;
@@ -67,7 +90,7 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
     if (pending) return;
     setPending(true);
     try {
-      const res = await fetch('/api/business-club/apply', {
+      const res = await fetch('/api/club-applications/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, [HONEYPOT_NAME]: honeypot }),
@@ -103,25 +126,23 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
         <div
           role="dialog"
           aria-modal="true"
-          aria-labelledby="business-club-join-title"
+          aria-labelledby="join-club-title"
           className="fixed inset-0 z-[90] flex items-center justify-center p-4"
         >
-          {/* Backdrop is decorative — chair wants close ONLY via the
-              X button, so no click handler here. */}
           <div aria-hidden="true" className="absolute inset-0 bg-black/50" />
 
           <div className="relative w-full max-w-2xl bg-white text-gray-800 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-100 px-7 md:px-8 py-5 flex items-start justify-between gap-3 z-[1]">
               <div>
                 <h2
-                  id="business-club-join-title"
+                  id="join-club-title"
                   className="text-xl md:text-2xl font-display font-bold text-primary leading-tight"
                 >
-                  Join the Business Club
+                  Join a Club
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Fill in your details — the Business Club team will reach out shortly.
+                  Pick the club you want to join and fill in your details — the
+                  team will reach out shortly.
                 </p>
               </div>
               <button
@@ -144,8 +165,9 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
                   Your application is in!
                 </h3>
                 <p className="text-sm text-gray-600 max-w-sm mx-auto">
-                  We&apos;ve received your submission. The Business Club team will get in
-                  touch via email shortly.
+                  We&apos;ve received your submission
+                  {chosenClub ? ` for the ${chosenClub.name}` : ''}. The team
+                  will get in touch via email shortly.
                 </p>
                 <button
                   type="button"
@@ -157,6 +179,28 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="px-7 md:px-8 py-6 space-y-5" noValidate>
+                <Field label="Which club do you want to join?" required>
+                  {/* Inline colors on <select>/<option> because Chrome
+                      renders the native panel with the inherited color,
+                      which comes out near-invisible inside this modal. */}
+                  <select
+                    required
+                    value={form.clubSlug}
+                    onChange={(e) => update('clubSlug', e.target.value)}
+                    className={`${inputClass} bg-white`}
+                    style={{ color: '#111827', backgroundColor: '#ffffff' }}
+                  >
+                    <option value="" disabled style={optionStyle}>
+                      Select a club
+                    </option>
+                    {clubs.map((c) => (
+                      <option key={c.slug} value={c.slug} style={optionStyle}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Full name" required>
                     <input
@@ -208,12 +252,6 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
                 </div>
 
                 <Field label="Current semester" required>
-                  {/* Inline color/background on the <select> + each
-                      <option> because Chrome's native dropdown panel
-                      renders options with the OS / inherited color,
-                      and inside the modal's overflow container the
-                      defaults can come out near-invisible. Explicit
-                      dark-on-white removes the ambiguity. */}
                   <select
                     required
                     value={form.semester}
@@ -221,15 +259,11 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
                     className={`${inputClass} bg-white`}
                     style={{ color: '#111827', backgroundColor: '#ffffff' }}
                   >
-                    <option value="" disabled style={{ color: '#6b7280', backgroundColor: '#ffffff' }}>
+                    <option value="" disabled style={optionStyle}>
                       Select your current semester
                     </option>
                     {['1', '2', '3', '4', '5', '6', '7', '8'].map((n) => (
-                      <option
-                        key={n}
-                        value={n}
-                        style={{ color: '#111827', backgroundColor: '#ffffff' }}
-                      >
+                      <option key={n} value={n} style={optionStyle}>
                         Semester {n}
                       </option>
                     ))}
@@ -242,7 +276,7 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
                     rows={4}
                     value={form.motivation}
                     onChange={(e) => update('motivation', e.target.value)}
-                    placeholder="A short paragraph on what excites you about the Business Club — projects, interests, what you'd like to contribute."
+                    placeholder="A short paragraph on what excites you about this club — activities, interests, what you'd like to contribute."
                     className={`${inputClass} resize-y`}
                     maxLength={2000}
                   />
@@ -253,9 +287,9 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
                   aria-hidden="true"
                   className="absolute left-[-9999px] w-px h-px overflow-hidden opacity-0 pointer-events-none"
                 >
-                  <label htmlFor="business-club-website">Website</label>
+                  <label htmlFor="join-club-website">Website</label>
                   <input
-                    id="business-club-website"
+                    id="join-club-website"
                     type="text"
                     name={HONEYPOT_NAME}
                     tabIndex={-1}
@@ -298,10 +332,11 @@ export default function JoinBusinessClubButton({ label }: { label: string }) {
   );
 }
 
-// Explicit text-gray-900 + bg-white because the modal is portaled
-// inside the "Building a Professional Network" section which sets
-// `text-white` on its descendants; without overriding here the
-// typed value rendered white-on-white and looked invisible.
+const optionStyle = { color: '#111827', backgroundColor: '#ffffff' };
+
+// Explicit text-gray-900 + bg-white because the closing panel this
+// modal opens from sets `text-white` on its descendants; without the
+// override the typed value renders white-on-white.
 const inputClass =
   'w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent';
 
