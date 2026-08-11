@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { Search, Download, ExternalLink } from 'lucide-react';
 
@@ -28,6 +29,26 @@ function toDownloadUrl(url: string): string {
   const head = url.slice(0, i + marker.length);
   const tail = url.slice(i + marker.length);
   return tail.startsWith('fl_attachment') ? url : `${head}fl_attachment/${tail}`;
+}
+
+/**
+ * Cover thumbnail: Cloudinary rasterises page 1 of a stored PDF when
+ * asked for `pg_1` with an image extension. That means the preview is
+ * derived from the PDF we already have — there is no second upload to
+ * keep in sync, and no cover column to fill in, so a syllabus can never
+ * show a thumbnail belonging to a different document.
+ *
+ * Returns null for anything that isn't a Cloudinary-hosted PDF; the
+ * card then renders without a cover rather than a broken image.
+ */
+function toCoverUrl(url: string | null): string | null {
+  if (!url || !url.includes('res.cloudinary.com')) return null;
+  const marker = '/upload/';
+  const i = url.indexOf(marker);
+  if (i === -1 || !url.toLowerCase().endsWith('.pdf')) return null;
+  const head = url.slice(0, i + marker.length);
+  const tail = url.slice(i + marker.length).replace(/\.pdf$/i, '.jpg');
+  return `${head}pg_1,f_jpg,q_auto/${tail}`;
 }
 
 export default function SyllabusClient({ items }: { items: readonly SyllabusCardRow[] }) {
@@ -111,6 +132,19 @@ export default function SyllabusClient({ items }: { items: readonly SyllabusCard
                 filtered.length === 1 ? 'w-full max-w-md' : ''
               }`}
             >
+              {toCoverUrl(s.pdfUrl) && (
+                <div className="bg-gray-50">
+                  <Image
+                    src={toCoverUrl(s.pdfUrl)!}
+                    alt={`${s.shortTitle} syllabus — first page`}
+                    width={600}
+                    height={800}
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="block w-full h-auto"
+                  />
+                </div>
+              )}
+
               <div className="p-5 flex-1 flex flex-col">
                 <span
                   className={`inline-block w-fit px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase mb-3 ${
