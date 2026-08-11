@@ -26,6 +26,37 @@ function splitLines(raw: string): string[] {
     .filter(Boolean);
 }
 
+/** Blank input means "no value", not zero. */
+function numOrNull(v: FormDataEntryValue | null): number | null {
+  if (typeof v !== 'string' || !v.trim()) return null;
+  const n = Number(v.trim());
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Course list textarea, one course per line:
+ *
+ *   1st Year 1st Semester | LAW 1101 | Jurisprudence | 4
+ *
+ * Split on the FIRST two and the LAST separator so a course title may
+ * itself contain a "|". Lines missing a field or a numeric credit are
+ * dropped rather than stored half-formed.
+ */
+function parseCourses(raw: string) {
+  return splitLines(raw)
+    .map((line) => {
+      const parts = line.split('|').map((s) => s.trim());
+      if (parts.length < 4) return null;
+      const semester = parts[0];
+      const code = parts[1];
+      const credits = Number(parts[parts.length - 1]);
+      const title = parts.slice(2, -1).join(' | ').trim();
+      if (!semester || !code || !title || !Number.isFinite(credits)) return null;
+      return { semester, code, title, credits, type: 'Core' };
+    })
+    .filter((c): c is NonNullable<typeof c> => c !== null);
+}
+
 async function requireAuth(): Promise<ActionResult | null> {
   const session = await getSession();
   if (!session?.user) return { ok: false, error: 'Not authenticated' };
@@ -49,6 +80,10 @@ export async function createProgramAction(
     overviewParagraphs: splitLines(getStr(formData, 'overviewParagraphs')),
     careerIntro:     splitLines(getStr(formData, 'careerIntro')),
     careerRoles:     splitLines(getStr(formData, 'careerRoles')),
+    courses:         parseCourses(getStr(formData, 'courses')),
+    totalCredits:    numOrNull(formData.get('totalCredits')),
+    coreCredits:     numOrNull(formData.get('coreCredits')),
+    projectCredits:  numOrNull(formData.get('projectCredits')),
     specializations: splitLines(getStr(formData, 'specializations')),
     cta:             emptyToNull(formData.get('cta')),
     ctaHref:         emptyToNull(formData.get('ctaHref')),
@@ -89,6 +124,10 @@ export async function createProgramAction(
         specializations: parsed.data.specializations,
         careerIntro:     parsed.data.careerIntro,
         careerRoles:     parsed.data.careerRoles,
+        courses:         parsed.data.courses,
+        totalCredits:    parsed.data.totalCredits,
+        coreCredits:     parsed.data.coreCredits,
+        projectCredits:  parsed.data.projectCredits,
         cta:             parsed.data.cta ?? null,
         ctaHref:         parsed.data.ctaHref ?? null,
       },
@@ -131,6 +170,10 @@ export async function updateProgramAction(
     overviewParagraphs: splitLines(getStr(formData, 'overviewParagraphs')),
     careerIntro:     splitLines(getStr(formData, 'careerIntro')),
     careerRoles:     splitLines(getStr(formData, 'careerRoles')),
+    courses:         parseCourses(getStr(formData, 'courses')),
+    totalCredits:    numOrNull(formData.get('totalCredits')),
+    coreCredits:     numOrNull(formData.get('coreCredits')),
+    projectCredits:  numOrNull(formData.get('projectCredits')),
     specializations: splitLines(getStr(formData, 'specializations')),
     cta:             emptyToNull(formData.get('cta')),
     ctaHref:         emptyToNull(formData.get('ctaHref')),

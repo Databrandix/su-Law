@@ -190,6 +190,15 @@ model Program {
   // one of them is filled in.
   careerIntro     Json     @default("[]")
   careerRoles     String[] @default([])
+
+  // Course Structure — Json [{ semester, code, title, credits, type }]
+  // in the curriculum's own order. Per-semester totals are derived from
+  // these rows at render time so they cannot drift from the course list.
+  courses         Json     @default("[]")
+  // Programme-level credit figures as the department publishes them.
+  totalCredits    Float?
+  coreCredits     Float?
+  projectCredits  Float?
   cta             String?
   ctaHref         String?
 

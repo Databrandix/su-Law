@@ -84,6 +84,41 @@ export default function ProgramForm({ initial }: { initial: Program | null }) {
                        defaultValue={toStringArray(initial?.overviewParagraphs).join('\n')} />
       </Card>
 
+      <Card title="Credit summary (optional)">
+        <p className="-mt-2 text-xs text-gray-500">
+          The department&apos;s published programme figures, shown as cards
+          under the Credit Distribution table. Leave blank to omit a card.
+        </p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <TextField label="Total credits" name="totalCredits"
+                     defaultValue={initial?.totalCredits?.toString() ?? ''} />
+          <TextField label="Core credits" name="coreCredits"
+                     defaultValue={initial?.coreCredits?.toString() ?? ''} />
+          <TextField label="Project / thesis credits" name="projectCredits"
+                     defaultValue={initial?.projectCredits?.toString() ?? ''} />
+        </div>
+        <p className="text-xs text-gray-500">
+          The per-semester table is calculated from the course list below,
+          so it always matches the courses actually shown.
+        </p>
+      </Card>
+
+      <Card title="Course structure (optional)">
+        <p className="-mt-2 text-xs text-gray-500">
+          One course per line, as{' '}
+          <code className="font-mono">Semester | Code | Title | Credits</code>.
+          Courses are grouped into collapsible panels in the order given —
+          repeat the semester name on each of its courses.
+        </p>
+        <TextAreaField
+          label="Courses"
+          name="courses"
+          rows={14}
+          defaultValue={coursesToText(initial?.courses)}
+          placeholder={'1st Year 1st Semester | LAW 1101 | Jurisprudence | 4\n1st Year 1st Semester | LAW 1102 | Law of Contract | 4'}
+        />
+      </Card>
+
       <Card title="Career Prospects (optional)">
         <p className="-mt-2 text-xs text-gray-500">
           Leave both blank to hide the section. The role list renders
@@ -140,6 +175,17 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 function toStringArray(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
   return v.filter((s): s is string => typeof s === 'string' && s.length > 0);
+}
+
+/** Courses Json -> the "Semester | Code | Title | Credits" textarea. */
+function coursesToText(v: unknown): string {
+  if (!Array.isArray(v)) return '';
+  return v
+    .filter((r): r is Record<string, unknown> => typeof r === 'object' && r !== null)
+    .map((r) =>
+      [r.semester ?? '', r.code ?? '', r.title ?? '', r.credits ?? ''].join(' | '),
+    )
+    .join('\n');
 }
 
 function TextField({

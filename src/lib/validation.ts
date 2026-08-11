@@ -102,6 +102,21 @@ export const programCreateSchema = z.object({
   // Career Prospects — intro/closing paragraphs plus the role list.
   careerIntro:     z.array(z.string().min(1)).default([]),
   careerRoles:     z.array(z.string().min(1)).default([]),
+  // Course Structure — grouped into semesters at render time.
+  courses: z
+    .array(
+      z.object({
+        semester: z.string().min(1).max(120),
+        code:     z.string().min(1).max(60),
+        title:    z.string().min(1).max(400),
+        credits:  z.number().nonnegative(),
+        type:     z.string().default('Core'),
+      }),
+    )
+    .default([]),
+  totalCredits:    z.number().nonnegative().nullable().default(null),
+  coreCredits:     z.number().nonnegative().nullable().default(null),
+  projectCredits:  z.number().nonnegative().nullable().default(null),
   cta:             z.string().nullable().optional(),
   ctaHref:         z.string().nullable().optional(),
 });

@@ -10,6 +10,7 @@ import Container from '@/components/ui/Container';
 import { DynamicLucideIcon } from '@/components/ui/DynamicLucideIcon';
 import { getProgramBySlug, getProgramSlugs, getPageHero } from '@/lib/identity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
+import CourseStructure, { type CourseRow } from './CourseStructure';
 
 export async function generateStaticParams() {
   const slugs = await getProgramSlugs();
@@ -43,6 +44,53 @@ function coerceParagraphs(v: unknown): string[] {
   return v.filter((s): s is string => typeof s === 'string' && s.length > 0);
 }
 
+// `courses` is a Json column — narrow it to the shape the table needs
+// rather than trusting the column at render time.
+function coerceCourses(v: unknown): CourseRow[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .filter((r): r is Record<string, unknown> => typeof r === 'object' && r !== null)
+    .map((r) => ({
+      semester: typeof r.semester === 'string' ? r.semester : '',
+      code:     typeof r.code === 'string' ? r.code : '',
+      title:    typeof r.title === 'string' ? r.title : '',
+      credits:  typeof r.credits === 'number' && Number.isFinite(r.credits) ? r.credits : 0,
+      type:     typeof r.type === 'string' ? r.type : 'Core',
+    }))
+    .filter((r) => r.code && r.title);
+}
+
+/**
+ * Group courses into semesters, preserving the curriculum's own order
+ * rather than sorting — the workbook lists semesters chronologically
+ * and course order within a semester is meaningful.
+ */
+function groupBySemester(courses: CourseRow[]) {
+  const order: string[] = [];
+  const bySemester = new Map<string, CourseRow[]>();
+  for (const c of courses) {
+    if (!bySemester.has(c.semester)) {
+      bySemester.set(c.semester, []);
+      order.push(c.semester);
+    }
+    bySemester.get(c.semester)!.push(c);
+  }
+  return order.map((name) => {
+    const rows = bySemester.get(name)!;
+    return {
+      name,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      courses: rows,
+      credits: rows.reduce((t, c) => t + c.credits, 0),
+    };
+  });
+}
+
+/** Credits print as "0.75" / "18" rather than "18.00". */
+function fmtCredits(n: number): string {
+  return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2)));
+}
+
 type StatCard = { iconName?: string; label: string; value: string };
 
 function coerceStats(v: unknown): StatCard[] {
@@ -71,6 +119,9 @@ export default async function ProgramDetailPage({
 
   const paragraphs = coerceParagraphs(program.overviewParagraphs);
   const careerIntro = coerceParagraphs(program.careerIntro);
+  const courses = coerceCourses(program.courses);
+  const semesterGroups = groupBySemester(courses);
+  const courseCredits = courses.reduce((t, c) => t + c.credits, 0);
   const stats = coerceStats(program.feeStructure?.overviewStats);
 
   return (
@@ -224,6 +275,124 @@ export default async function ProgramDetailPage({
                 ))}
               </div>
             </div>
+          </section>
+        )}
+
+        {/* ───── Course Structure ─────
+            One collapsible panel per semester, matching the reference.
+            Counts come from the course rows themselves, so the summary
+            line can never disagree with the tables below it. */}
+        {semesterGroups.length > 0 && (
+          <section className="mb-14 md:mb-20">
+            <h2 className="mb-2 text-center font-display text-xl font-bold text-primary md:text-2xl">
+              Course Structure
+            </h2>
+            <p className="mx-auto mb-8 max-w-2xl text-center text-[15px] text-gray-600">
+              {courses.length} courses across {semesterGroups.length} semesters.
+              Select a semester to see its courses.
+            </p>
+            <CourseStructure groups={semesterGroups} />
+          </section>
+        )}
+
+        {/* ───── Credit Distribution ─────
+            Per-semester rows with a running cumulative column, then the
+            department's published programme totals. */}
+        {semesterGroups.length > 0 && (
+          <section className="mx-auto mb-14 max-w-6xl md:mb-20">
+            <h2 className="mb-6 text-center font-display text-xl font-bold text-primary md:text-2xl">
+              Credit Distribution
+            </h2>
+            <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <table className="w-full min-w-[34rem] text-left text-[14px]">
+                <caption className="sr-only">
+                  Credits per semester with a running cumulative total
+                </caption>
+                <thead>
+                  <tr className="bg-gray-50 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                    <th scope="col" className="px-5 py-3">Semester</th>
+                    <th scope="col" className="px-5 py-3 text-right">Courses</th>
+                    <th scope="col" className="px-5 py-3 text-right">Credits</th>
+                    <th scope="col" className="px-5 py-3 text-right">Cumulative</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    let running = 0;
+                    return semesterGroups.map((g) => {
+                      running += g.credits;
+                      return (
+                        <tr key={g.slug} className="border-t border-gray-100">
+                          <td className="px-5 py-3 font-medium text-gray-800">{g.name}</td>
+                          <td className="px-5 py-3 text-right tabular-nums text-gray-600">
+                            {g.courses.length}
+                          </td>
+                          <td className="px-5 py-3 text-right font-bold tabular-nums text-primary">
+                            {fmtCredits(g.credits)}
+                          </td>
+                          <td className="px-5 py-3 text-right font-semibold tabular-nums text-gray-700">
+                            {fmtCredits(running)}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-gray-200 bg-gray-50">
+                    <td className="px-5 py-3 font-bold text-primary">Total</td>
+                    <td className="px-5 py-3 text-right font-bold tabular-nums text-primary">
+                      {courses.length}
+                    </td>
+                    <td className="px-5 py-3 text-right font-bold tabular-nums text-primary" colSpan={2}>
+                      {fmtCredits(courseCredits)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            {/* Programme-level figures as the department publishes them.
+                Shown separately from the per-semester table above so the
+                two are never conflated. */}
+            {(program.totalCredits != null ||
+              program.coreCredits != null ||
+              program.projectCredits != null) && (
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                {[
+                  { label: 'Total Credits',   value: program.totalCredits },
+                  { label: 'Core Credits',    value: program.coreCredits },
+                  { label: 'Project / Thesis', value: program.projectCredits },
+                ]
+                  .filter((s) => s.value != null)
+                  .map((s) => (
+                    <div
+                      key={s.label}
+                      className="rounded-xl border border-gray-100 bg-white p-5 text-center shadow-sm"
+                    >
+                      <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                        {s.label}
+                      </div>
+                      <div className="font-display text-lg font-bold leading-tight text-primary md:text-xl">
+                        {fmtCredits(s.value as number)}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {/* The LL.M sheet lists more credits than its stated
+                programme total, which means its courses are a pool
+                students select from. Say so rather than leaving two
+                contradictory numbers on the page unexplained. */}
+            {program.totalCredits != null &&
+              Math.abs(courseCredits - program.totalCredits) > 0.001 && (
+                <p className="mx-auto mt-4 max-w-3xl text-center text-[13px] leading-relaxed text-gray-500">
+                  The courses listed above total {fmtCredits(courseCredits)} credits, while the
+                  programme requires {fmtCredits(program.totalCredits)}. Students complete the
+                  required credits from the courses offered.
+                </p>
+              )}
           </section>
         )}
 
