@@ -5,6 +5,7 @@ import {
   ClipboardList,
   Clock,
   CreditCard,
+  Info,
 } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import Container from '@/components/ui/Container';
@@ -413,9 +414,17 @@ export default async function ProgramDetailPage({
                 department rather than derived from the numbers, so the
                 page never puts words in their mouth. */}
             {program.curriculumNote && (
-              <p className="mx-auto mt-4 max-w-3xl text-center text-[13px] leading-relaxed text-gray-500">
-                {program.curriculumNote}
-              </p>
+              // A tinted callout with a left accent rule rather than
+              // small grey type: this note is what reconciles the
+              // "offered" figures above with the credits the programme
+              // actually requires, so it has to be read, not skimmed
+              // past.
+              <div className="mt-6 flex items-start gap-3 rounded-xl border border-accent/20 bg-accent/5 p-5 text-left">
+                <Info size={18} className="mt-0.5 shrink-0 text-accent" />
+                <p className="text-[14px] leading-relaxed text-gray-700">
+                  {program.curriculumNote}
+                </p>
+              </div>
             )}
           </section>
         )}
