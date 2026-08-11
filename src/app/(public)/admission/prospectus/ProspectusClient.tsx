@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-import { Search, Download } from 'lucide-react';
+import { Search, Download, ExternalLink } from 'lucide-react';
 
 type Level = 'Undergraduate' | 'Postgraduate';
 
@@ -20,6 +20,21 @@ export interface ProspectusItem {
 }
 
 const filters: ('All' | Level)[] = ['All', 'Undergraduate', 'Postgraduate'];
+
+/**
+ * A plain `download` attribute is ignored cross-origin, so a Cloudinary
+ * cover would just open in the tab instead of saving. Asking Cloudinary
+ * for the attachment disposition makes the browser save it either way.
+ * Non-Cloudinary URLs are returned untouched.
+ */
+function toDownloadUrl(url: string): string {
+  const marker = '/upload/';
+  const i = url.indexOf(marker);
+  if (!url.includes('res.cloudinary.com') || i === -1) return url;
+  const head = url.slice(0, i + marker.length);
+  const tail = url.slice(i + marker.length);
+  return tail.startsWith('fl_attachment') ? url : `${head}fl_attachment/${tail}`;
+}
 
 export default function ProspectusClient({ items }: { items: ProspectusItem[] }) {
   const [query, setQuery] = useState('');
@@ -144,20 +159,41 @@ export default function ProspectusClient({ items }: { items: ProspectusItem[] })
                 </h3>
                 <p className="text-sm text-gray-600 mb-5">{p.department}</p>
 
-                {p.pdf ? (
-                  <a
-                    href={p.pdf}
-                    download
-                    className="mt-auto inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-md transition-colors"
-                  >
-                    <Download size={16} />
-                    Download
-                  </a>
-                ) : (
-                  <span className="mt-auto inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-gray-100 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed">
-                    PDF coming soon
-                  </span>
-                )}
+                {/* The PDF is the real prospectus when it exists. Until
+                    one is uploaded the cover image IS the prospectus, so
+                    it gets the same View / Download pair rather than a
+                    dead "coming soon" button. */}
+                {(() => {
+                  const file = p.pdf || p.cover;
+                  if (!file) {
+                    return (
+                      <span className="mt-auto inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-gray-100 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed">
+                        Coming soon
+                      </span>
+                    );
+                  }
+                  return (
+                    <div className="mt-auto flex flex-col gap-2.5">
+                      <a
+                        href={file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-md transition-colors"
+                      >
+                        <ExternalLink size={16} />
+                        View
+                      </a>
+                      <a
+                        href={toDownloadUrl(file)}
+                        download
+                        className="inline-flex items-center justify-center gap-2 w-full px-5 py-3 border-2 border-primary bg-white text-primary hover:bg-primary hover:text-white text-sm font-semibold rounded-md transition-colors"
+                      >
+                        <Download size={16} />
+                        Download
+                      </a>
+                    </div>
+                  );
+                })()}
               </div>
             </article>
           ))}
