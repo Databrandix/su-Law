@@ -55,7 +55,7 @@ export default function OverviewSection({
           {heading}
         </motion.h2>
 
-        <div className="mx-auto grid max-w-[1090px] items-start lg:items-stretch gap-8 lg:gap-12 lg:grid-cols-[520px_1fr]">
+        <div className="mx-auto grid max-w-[1090px] items-stretch gap-8 lg:gap-12 lg:grid-cols-[520px_1fr]">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -73,11 +73,16 @@ export default function OverviewSection({
             </div>
           </motion.div>
 
+          {/* object-cover + a matching corner radius on the wrapper, so
+              the photo fills the column and squares off level with the
+              text beside it rather than floating at its own aspect
+              ratio. The wrapper carries the radius because `absolute
+              inset-0` on the image would otherwise overflow it. */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="order-1 lg:order-2 overflow-hidden lg:relative"
+            className="order-1 overflow-hidden rounded-2xl lg:relative lg:order-2"
           >
             <Image
               src={imageUrl}
@@ -85,7 +90,7 @@ export default function OverviewSection({
               width={1264}
               height={843}
               sizes="(min-width: 1024px) 540px, 100vw"
-              className="h-auto w-full lg:absolute lg:inset-0 lg:h-full lg:w-full lg:object-contain"
+              className="h-auto w-full object-cover lg:absolute lg:inset-0 lg:h-full lg:w-full"
             />
           </motion.div>
         </div>
