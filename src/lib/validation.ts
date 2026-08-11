@@ -117,6 +117,7 @@ export const programCreateSchema = z.object({
   totalCredits:    z.number().nonnegative().nullable().default(null),
   coreCredits:     z.number().nonnegative().nullable().default(null),
   projectCredits:  z.number().nonnegative().nullable().default(null),
+  curriculumNote:  optionalNullableString,
   cta:             z.string().nullable().optional(),
   ctaHref:         z.string().nullable().optional(),
 });

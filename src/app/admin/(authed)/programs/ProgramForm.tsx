@@ -101,6 +101,18 @@ export default function ProgramForm({ initial }: { initial: Program | null }) {
           The per-semester table is calculated from the course list below,
           so it always matches the courses actually shown.
         </p>
+        <TextAreaField
+          label="Note under the table (optional)"
+          name="curriculumNote"
+          rows={3}
+          defaultValue={initial?.curriculumNote ?? ''}
+          placeholder="Note: Students are required to take twelve courses…"
+        />
+        <p className="text-xs text-gray-500">
+          Use this when the course list needs explaining — for example
+          when a programme offers more courses than its credit
+          requirement because students select from them.
+        </p>
       </Card>
 
       <Card title="Course structure (optional)">

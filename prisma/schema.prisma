@@ -199,6 +199,10 @@ model Program {
   totalCredits    Float?
   coreCredits     Float?
   projectCredits  Float?
+  // The department's note on how to read the course list — e.g. that
+  // students select twelve of the courses offered. Shown under the
+  // Credit Distribution table.
+  curriculumNote  String?  @db.Text
   cta             String?
   ctaHref         String?
 

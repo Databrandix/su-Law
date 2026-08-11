@@ -123,6 +123,12 @@ export default async function ProgramDetailPage({
   const courses = coerceCourses(program.courses);
   const semesterGroups = groupBySemester(courses);
   const courseCredits = courses.reduce((t, c) => t + c.credits, 0);
+  // A programme that lists more credits than it requires is offering a
+  // selection, not a fixed sequence — the LL.M lists 61 against a
+  // 36-credit requirement because students take twelve of the courses.
+  const isSelectionBased =
+    program.totalCredits != null &&
+    courseCredits - program.totalCredits > 0.001;
   const stats = coerceStats(program.feeStructure?.overviewStats);
 
   return (
@@ -297,8 +303,9 @@ export default async function ProgramDetailPage({
               Course Structure
             </h2>
             <p className="mx-auto mb-8 max-w-2xl text-center text-[15px] text-gray-600">
-              {courses.length} courses across {semesterGroups.length} semesters.
-              Select a semester to see its courses.
+              {courses.length} courses {isSelectionBased ? 'offered' : ''} across{' '}
+              {semesterGroups.length} semesters. Select a semester to see its
+              courses.
             </p>
             <CourseStructure groups={semesterGroups} />
           </section>
@@ -320,8 +327,16 @@ export default async function ProgramDetailPage({
                 <thead>
                   <tr className="bg-gray-50 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     <th scope="col" className="px-5 py-3">Semester</th>
-                    <th scope="col" className="px-5 py-3 text-right">Courses</th>
-                    <th scope="col" className="px-5 py-3 text-right">Credits</th>
+                    {/* When a programme offers more than it requires,
+                        these columns describe what is on offer, not what
+                        one student takes — the headings say so rather
+                        than contradicting the note below the table. */}
+                    <th scope="col" className="px-5 py-3 text-right">
+                      {isSelectionBased ? 'Courses Offered' : 'Courses'}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-right">
+                      {isSelectionBased ? 'Credits Offered' : 'Credits'}
+                    </th>
                     <th scope="col" className="px-5 py-3 text-right">Cumulative</th>
                   </tr>
                 </thead>
@@ -349,7 +364,9 @@ export default async function ProgramDetailPage({
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-gray-200 bg-gray-50">
-                    <td className="px-5 py-3 font-bold text-primary">Total</td>
+                    <td className="px-5 py-3 font-bold text-primary">
+                      {isSelectionBased ? 'Total Offered' : 'Total'}
+                    </td>
                     <td className="px-5 py-3 text-right font-bold tabular-nums text-primary">
                       {courses.length}
                     </td>
@@ -390,18 +407,16 @@ export default async function ProgramDetailPage({
               </div>
             )}
 
-            {/* The LL.M sheet lists more credits than its stated
-                programme total, which means its courses are a pool
-                students select from. Say so rather than leaving two
-                contradictory numbers on the page unexplained. */}
-            {program.totalCredits != null &&
-              Math.abs(courseCredits - program.totalCredits) > 0.001 && (
-                <p className="mx-auto mt-4 max-w-3xl text-center text-[13px] leading-relaxed text-gray-500">
-                  The courses listed above total {fmtCredits(courseCredits)} credits, while the
-                  programme requires {fmtCredits(program.totalCredits)}. Students complete the
-                  required credits from the courses offered.
-                </p>
-              )}
+            {/* The department's own note on how to read the list — the
+                LL.M offers more courses than its 36 credits require
+                because students select twelve of them. Written by the
+                department rather than derived from the numbers, so the
+                page never puts words in their mouth. */}
+            {program.curriculumNote && (
+              <p className="mx-auto mt-4 max-w-3xl text-center text-[13px] leading-relaxed text-gray-500">
+                {program.curriculumNote}
+              </p>
+            )}
           </section>
         )}
 
