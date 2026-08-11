@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Download, ExternalLink, FileText, MapPin } from 'lucide-react';
+import { ArrowRight, Building2, Download, ExternalLink, FileText } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import Container from '@/components/ui/Container';
 import { getServiceCharter, getAboutDepartmentLayout } from '@/lib/identity';
@@ -24,6 +24,39 @@ function coerceOffices(v: unknown): OfficeRow[] {
       highlight: r.highlight === true,
     }))
     .filter((r) => r.name);
+}
+
+/**
+ * Groups the directory by floor, preserving the document's office
+ * order within each group.
+ *
+ * Sorting is on the parsed number, not the label: "Level 10" must not
+ * sort between "Level 01" and "Level 02" the way a string compare
+ * would put it. Any level that carries no number still gets its own
+ * card, ordered last — an office is never dropped for having a label
+ * this function did not anticipate.
+ */
+function groupByFloor(offices: OfficeRow[]) {
+  const groups = new Map<string, OfficeRow[]>();
+  for (const o of offices) {
+    const key = o.level || 'Other';
+    const bucket = groups.get(key);
+    if (bucket) bucket.push(o);
+    else groups.set(key, [o]);
+  }
+  return [...groups.entries()]
+    .map(([level, items]) => {
+      const digits = level.match(/\d+/);
+      return {
+        level,
+        // The badge shows the floor number the visitor is looking for,
+        // so it comes from the label rather than the card's position.
+        number: digits ? String(Number(digits[0])) : '–',
+        sortKey: digits ? Number(digits[0]) : Number.POSITIVE_INFINITY,
+        items,
+      };
+    })
+    .sort((a, b) => a.sortKey - b.sortKey);
 }
 
 /**
@@ -67,6 +100,7 @@ export default async function ServiceCharterPage() {
       )
     : [];
   const offices = coerceOffices(layout?.offices);
+  const floors = groupByFloor(offices);
   const cover = toCoverUrl(row?.pdfUrl ?? null);
 
   // The building line repeats on every row of the source table, so it
@@ -82,91 +116,103 @@ export default async function ServiceCharterPage() {
       contentClassName="bg-gray-50 py-12 md:py-20"
     >
       <Container>
-        <p className="mx-auto mb-10 max-w-3xl text-center text-[15px] leading-[1.85] text-gray-700 md:mb-14">
+        <p className="mx-auto mb-4 max-w-3xl text-center text-[15px] leading-[1.85] text-gray-700">
           {paragraphs[0] ??
-            'Where to go for what — every office of Sonargaon University serving students of the Department of Law, and the floor you will find it on.'}
+            'Where to go for what — every office of Sonargaon University serving students of the Department of Law, grouped by the floor you will find it on.'}
         </p>
         {paragraphs.slice(1).map((p, i) => (
           <p
             key={i}
-            className="mx-auto mb-6 max-w-3xl text-center text-[15px] leading-[1.85] text-gray-700"
+            className="mx-auto mb-4 max-w-3xl text-center text-[15px] leading-[1.85] text-gray-700"
           >
             {p}
           </p>
         ))}
 
-        {/* ───── Office directory ───── */}
-        {offices.length > 0 && (
-          <section className="mx-auto max-w-4xl">
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-              <header className="border-b border-gray-200 px-6 py-6 text-center">
-                <h2 className="font-display text-xl font-bold text-primary md:text-2xl">
-                  Sonargaon University
-                </h2>
-                {layout?.deptName && (
-                  <p className="mt-1 text-[15px] text-gray-700">{layout.deptName}</p>
-                )}
-                {layout?.address && (
-                  <p className="mt-0.5 text-[13.5px] text-gray-500">{layout.address}</p>
-                )}
-              </header>
+        {/* The building the whole directory refers to. It headed the
+            source table; with the table gone it belongs here, stated
+            once, rather than repeated on all 22 entries. */}
+        {(layout?.deptName || layout?.address) && (
+          <div className="mx-auto mb-10 max-w-3xl text-center md:mb-14">
+            {layout.deptName && (
+              <p className="text-[15px] font-semibold text-primary">{layout.deptName}</p>
+            )}
+            {layout.address && (
+              <p className="mt-0.5 text-[13.5px] text-gray-500">{layout.address}</p>
+            )}
+          </div>
+        )}
 
-              {/* Horizontal scroll rather than a squeezed table on
-                  narrow screens — min-w keeps both columns legible. */}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] text-left align-top text-[15px]">
-                  <caption className="sr-only">
-                    Each office of Sonargaon University and the level it is on
-                  </caption>
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50 text-[13px] font-bold text-gray-700">
-                      <th scope="col" className="w-[45%] px-5 py-3">
-                        Name of the Office
-                      </th>
-                      <th scope="col" className="px-5 py-3">
-                        Specific Location of the Office
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {offices.map((o) => (
-                      <tr key={o.name} className="border-b border-gray-100 last:border-b-0">
-                        <td className="px-5 py-3.5 align-top">
-                          {/* The department's own offices carry the brand
-                              colour so they stand out in a long list of
-                              university-wide offices. */}
-                          <span
-                            className={
-                              o.highlight ? 'font-semibold text-primary' : 'text-gray-800'
-                            }
-                          >
-                            {o.name}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 align-top text-gray-700">
-                          <span className="flex items-start gap-2">
-                            <MapPin
-                              size={15}
-                              className="mt-[3px] shrink-0 text-accent"
-                              aria-hidden="true"
-                            />
-                            <span>
-                              <span className="block">{o.level}, Sonargaon University</span>
-                              {buildingLine && (
-                                <span className="block text-[13.5px] text-gray-500">
-                                  Building: {buildingLine}
-                                </span>
-                              )}
-                            </span>
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
+        {/* ───── Office directory, one card per floor ─────
+            The reference lays its charter out as numbered cards in a
+            grid rather than one long table. The directory has no steps
+            to number, so the floor number takes that slot: it is the
+            one axis a visitor actually navigates by ("which level do I
+            go to?"), and it turns 22 undifferentiated rows into four
+            scannable groups. */}
+        {floors.length > 0 && (
+          <div className="mx-auto grid max-w-[1400px] items-start gap-5 md:gap-6 lg:grid-cols-2 xl:grid-cols-3">
+            {floors.map(({ level, number, items }) => (
+              <article
+                key={level}
+                // items-start on the grid, so a floor with one office
+                // is a short card rather than a tall one padded with
+                // empty space to match its row.
+                className="flex h-fit flex-col rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-lg md:p-7"
+              >
+                <header className="mb-4 flex items-start gap-3">
+                  <span className="bg-primary text-white font-display inline-flex size-9 shrink-0 items-center justify-center rounded-full text-[14px] font-bold">
+                    {number}
+                  </span>
+                  <h2 className="text-primary mt-1 text-[16px] leading-snug font-bold">
+                    {level}
+                    <span className="block text-[13px] font-medium text-gray-500">
+                      {items.length} {items.length === 1 ? 'office' : 'offices'}
+                    </span>
+                  </h2>
+                </header>
+
+                <ol className="mb-5 flex flex-col gap-3">
+                  {items.map((o) => (
+                    <li
+                      key={o.name}
+                      className="flex gap-3 text-[14px] leading-[1.7] text-gray-700"
+                    >
+                      <ArrowRight
+                        size={15}
+                        className="text-accent mt-1 shrink-0"
+                        aria-hidden="true"
+                      />
+                      {/* The department's own offices carry the brand
+                          colour so they stand out in a long list of
+                          university-wide offices. */}
+                      <span
+                        className={`min-w-0 break-words ${
+                          o.highlight ? 'font-semibold text-primary' : ''
+                        }`}
+                      >
+                        {o.name}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+
+                <footer className="flex gap-2.5 border-t border-gray-100 pt-4">
+                  <Building2
+                    size={15}
+                    className="mt-0.5 shrink-0 text-gray-400"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 text-[13px] leading-[1.65] text-gray-600">
+                    <span className="block font-semibold text-gray-800">
+                      {level}, Sonargaon University
+                    </span>
+                    {buildingLine && <span className="block">Building: {buildingLine}</span>}
+                  </div>
+                </footer>
+              </article>
+            ))}
+          </div>
         )}
 
         {/* ───── Downloadable charter ───── */}
