@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Search, Download } from 'lucide-react';
+import { Search, Download, ExternalLink } from 'lucide-react';
 
 export type SyllabusCardRow = {
   slug: string;
@@ -14,6 +14,21 @@ export type SyllabusCardRow = {
 };
 
 const FILTERS = ['All', 'Undergraduate', 'Postgraduate'] as const;
+
+/**
+ * A plain `download` attribute is ignored cross-origin, so a Cloudinary
+ * PDF would open in the tab instead of saving. Asking Cloudinary for the
+ * attachment disposition makes the browser save it either way.
+ * Non-Cloudinary URLs are returned untouched.
+ */
+function toDownloadUrl(url: string): string {
+  const marker = '/upload/';
+  const i = url.indexOf(marker);
+  if (!url.includes('res.cloudinary.com') || i === -1) return url;
+  const head = url.slice(0, i + marker.length);
+  const tail = url.slice(i + marker.length);
+  return tail.startsWith('fl_attachment') ? url : `${head}fl_attachment/${tail}`;
+}
 
 export default function SyllabusClient({ items }: { items: readonly SyllabusCardRow[] }) {
   const [query, setQuery] = useState('');
@@ -116,14 +131,27 @@ export default function SyllabusClient({ items }: { items: readonly SyllabusCard
                 )}
 
                 {s.pdfUrl ? (
-                  <a
-                    href={s.pdfUrl}
-                    download
-                    className="mt-auto inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-md transition-colors"
-                  >
-                    <Download size={16} />
-                    Download Syllabus
-                  </a>
+                  // View opens in a new tab so the visitor keeps this
+                  // page; Download forces a save.
+                  <div className="mt-auto flex flex-col gap-2.5">
+                    <a
+                      href={s.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-md transition-colors"
+                    >
+                      <ExternalLink size={16} />
+                      View Syllabus
+                    </a>
+                    <a
+                      href={toDownloadUrl(s.pdfUrl)}
+                      download
+                      className="inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white text-sm font-semibold rounded-md transition-colors"
+                    >
+                      <Download size={16} />
+                      Download
+                    </a>
+                  </div>
                 ) : (
                   <span className="mt-auto inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-gray-100 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed">
                     PDF not uploaded yet
