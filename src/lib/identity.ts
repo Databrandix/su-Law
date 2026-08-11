@@ -244,6 +244,14 @@ export const getAboutDepartmentLayout = cache(async () => {
   return prisma.aboutDepartmentLayout.findUnique({ where: { id: 'singleton' } });
 });
 
+// Service Charter (Student Society). The office directory it renders
+// lives on AboutDepartmentLayout — verified identical to the
+// department's charter document — so this only carries the page's own
+// hero, intro copy and PDF.
+export const getServiceCharter = cache(async () => {
+  return prisma.serviceCharter.findUnique({ where: { id: 'singleton' } });
+});
+
 // Faculty (Phase 2). Full rows are returned — including Json
 // section content + Dean/Head message extras — so the public
 // pages can render every section without per-page Prisma calls.

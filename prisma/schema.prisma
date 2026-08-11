@@ -511,6 +511,34 @@ model AboutOverview {
 // a cover image, a caption, and a Download button for the layout PDF —
 // the same cover+PDF shape as ProspectusEntry, but a single fixed entry
 // rather than a list.
+model ServiceCharter {
+  // Student Society → Service Charter. The office directory itself is
+  // NOT duplicated here: it is read from AboutDepartmentLayout, whose
+  // 22 offices were verified row-by-row against the department's
+  // Service-Charter source document (identical names, levels, order).
+  // One stored copy means the two pages cannot drift apart.
+  //
+  // This row holds only what is specific to this page: its intro copy
+  // and the downloadable charter PDF.
+  id                       String   @id @default("singleton")
+  heroTitle                String   @default("Service Charter")
+  heroOverline             String?
+  heroImageUrl             String
+  heroImagePublicId        String?
+  heroImageVerticalPercent Int      @default(50)
+  paragraphs               Json     @default("[]")
+  cardTitle                String   @default("Service Charter")
+  coverUrl                 String?
+  coverPublicId            String?
+  // Nullable so the row can exist before the file is uploaded.
+  pdfUrl                   String?
+  pdfPublicId              String?
+  pdfFileName              String?
+  updatedAt                DateTime @updatedAt
+
+  @@map("service_charter")
+}
+
 model AboutDepartmentLayout {
   id                       String   @id @default("singleton")
   heroTitle                String
