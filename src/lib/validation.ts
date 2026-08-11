@@ -99,6 +99,9 @@ export const programCreateSchema = z.object({
   imageUrl:        optionalNullableString,
   imagePublicId:   optionalNullableString,
   specializations: z.array(z.string()).default([]),
+  // Career Prospects — intro/closing paragraphs plus the role list.
+  careerIntro:     z.array(z.string().min(1)).default([]),
+  careerRoles:     z.array(z.string().min(1)).default([]),
   cta:             z.string().nullable().optional(),
   ctaHref:         z.string().nullable().optional(),
 });
@@ -399,6 +402,18 @@ export const aboutDepartmentLayoutUpdateSchema = z.object({
   heroImagePublicId: optionalNullableString,
   heroImageVerticalPercent: z.coerce.number().int().min(0).max(100).default(50),
   paragraphs:        z.array(z.string().min(1)).default([]),
+  // Office directory table.
+  deptName:          optionalNullableString,
+  address:           optionalNullableString,
+  offices: z
+    .array(
+      z.object({
+        name:      z.string().min(1).max(300),
+        level:     z.string().min(1).max(120),
+        highlight: z.coerce.boolean().default(false),
+      }),
+    )
+    .default([]),
   cardTitle:         z.string().min(1).max(300),
   coverUrl:          optionalNullableString,
   coverPublicId:     optionalNullableString,

@@ -185,6 +185,11 @@ model Program {
   imageUrl        String?
   imagePublicId   String?
   specializations String[]
+  // Career Prospects section: intro paragraphs plus the list of roles a
+  // graduate can enter. Empty by default — the section only renders when
+  // one of them is filled in.
+  careerIntro     Json     @default("[]")
+  careerRoles     String[] @default([])
   cta             String?
   ctaHref         String?
 
@@ -502,6 +507,12 @@ model AboutDepartmentLayout {
   heroImageVerticalPercent Int      @default(50)
   // Optional intro copy above the card.
   paragraphs               Json     @default("[]")
+  // Office directory table. deptName + address head it; offices is
+  // [{ name, level, highlight }] — highlight marks the department's own
+  // offices, which render in the brand colour instead of plain grey.
+  deptName                 String?
+  address                  String?
+  offices                  Json     @default("[]")
   // The layout card. Caption under the cover; nullable cover/PDF so the
   // row can exist before the artwork and file are uploaded.
   cardTitle                String   @default("Department Layout")

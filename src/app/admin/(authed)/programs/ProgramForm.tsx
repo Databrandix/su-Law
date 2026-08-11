@@ -84,6 +84,21 @@ export default function ProgramForm({ initial }: { initial: Program | null }) {
                        defaultValue={toStringArray(initial?.overviewParagraphs).join('\n')} />
       </Card>
 
+      <Card title="Career Prospects (optional)">
+        <p className="-mt-2 text-xs text-gray-500">
+          Leave both blank to hide the section. The role list renders
+          between the first paragraph and any that follow it.
+        </p>
+        <TextAreaField label="Paragraphs (one per line)"
+                       name="careerIntro" rows={4}
+                       defaultValue={toStringArray(initial?.careerIntro).join('\n')}
+                       placeholder={'LL.M. graduates can pursue careers as:\nThe programme also strengthens…'} />
+        <TextAreaField label="Roles (one per line)"
+                       name="careerRoles" rows={8}
+                       defaultValue={(initial?.careerRoles ?? []).join('\n')}
+                       placeholder={'Advocates in the Supreme Court of Bangladesh\nJudicial Officers…'} />
+      </Card>
+
       <Card title="Image (optional)">
         <ImageUploader kind="program-image" name="image"
                        initialUrl={initial?.imageUrl}

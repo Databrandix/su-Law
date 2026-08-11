@@ -43,6 +43,19 @@ export default function AboutDepartmentLayoutForm({
         .join('\n')
     : '';
 
+  // The office table round-trips through one textarea, one office per
+  // line as `name | level`, with a leading `*` for the department's own
+  // offices. Same format parseOffices() reads on the server.
+  const offices = Array.isArray(initial?.offices)
+    ? (initial.offices as unknown[])
+        .filter((o): o is Record<string, unknown> => typeof o === 'object' && o !== null)
+        .map((o) => {
+          const star = o.highlight === true ? '* ' : '';
+          return `${star}${String(o.name ?? '')} | ${String(o.level ?? '')}`;
+        })
+        .join('\n')
+    : '';
+
   return (
     <form action={formAction} className="space-y-6">
       <Card title="Hero">
@@ -68,6 +81,33 @@ export default function AboutDepartmentLayoutForm({
           defaultValue={paragraphs}
           placeholder="Leave empty to show only the download card."
         />
+      </Card>
+
+      <Card title="Office directory">
+        <p className="-mt-2 text-xs text-gray-500">
+          The table of offices. Leave the list empty to hide the table
+          entirely and show only the download card.
+        </p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <TextField label="Department name" name="deptName"
+                     defaultValue={initial?.deptName ?? ''}
+                     placeholder="Department of Law" />
+          <TextField label="Address" name="address"
+                     defaultValue={initial?.address ?? ''}
+                     placeholder="147/I, Panthapath, Greenroad, Dhaka-1215" />
+        </div>
+        <TextAreaField
+          label="Offices — one per line, as “name | level”"
+          name="offices"
+          rows={14}
+          defaultValue={offices}
+          placeholder={'Office of the Registrar | Level 01\n* Office of the Head, Department of Law | Level 02'}
+        />
+        <p className="text-xs text-gray-500">
+          Start a line with <code className="font-mono">*</code> to mark it as one
+          of the department&apos;s own offices — those render in the brand
+          colour so they stand out in the list.
+        </p>
       </Card>
 
       <Card title="Layout card">
