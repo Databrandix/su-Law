@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
-  ArrowRight,
   CheckCircle2,
+  ClipboardList,
   Clock,
+  CreditCard,
 } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import Container from '@/components/ui/Container';
@@ -396,27 +397,29 @@ export default async function ProgramDetailPage({
           </section>
         )}
 
-        {/* ───── Next steps ───── */}
-        <section className="relative overflow-hidden rounded-2xl bg-primary text-white shadow-lg">
-          <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 -translate-y-1/3 translate-x-1/3 rounded-full bg-accent/20 blur-3xl" />
-          <div className="relative grid gap-6 p-7 md:grid-cols-[1fr_auto] md:items-center md:p-10">
-            <div>
-              <span className="mb-2 inline-block text-[10px] font-bold uppercase tracking-[0.3em] text-button-yellow">
-                Next Steps
-              </span>
-              <h2 className="font-display text-xl font-bold md:text-2xl">
-                Ready to apply for the {program.degreeCode} program?
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
-                Review the eligibility criteria, tuition fee structure, and the
-                waivers and scholarships available to new students.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
+        {/* ───── Ready to Apply ─────
+            Narrow, centred panel matching the reference: heading, one
+            line of copy, then the two buttons stacked on mobile and
+            side by side from sm. */}
+        <section className="mx-auto max-w-3xl">
+          <div className="rounded-2xl bg-primary p-8 text-center shadow-2xl md:p-12">
+            <h2 className="mb-4 font-display text-2xl font-bold text-white md:text-3xl">
+              Ready to Apply?
+            </h2>
+            <p className="mx-auto mb-8 max-w-lg text-[15px] leading-relaxed text-white/80">
+              Take the next step toward your career in {program.programName}.
+              Review the admission requirements or explore the tuition fee
+              structure.
+            </p>
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <CtaLink href="/admission/requirements" primary>
-                Admission Requirements
+                <ClipboardList size={18} />
+                View Requirements
               </CtaLink>
-              <CtaLink href="/admission/tuition-fees">Tuition Fees</CtaLink>
+              <CtaLink href="/admission/tuition-fees">
+                <CreditCard size={18} />
+                Tuition Fees
+              </CtaLink>
             </div>
           </div>
         </section>
@@ -437,14 +440,13 @@ function CtaLink({
   return (
     <Link
       href={href}
-      className={`group inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-all ${
+      className={`inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3.5 font-bold transition-colors ${
         primary
-          ? 'bg-accent text-white shadow-md hover:bg-accent/90'
-          : 'border border-white/30 text-white hover:border-white hover:bg-white/10'
+          ? 'bg-button-yellow text-primary shadow-md hover:bg-button-yellow/90'
+          : 'border-2 border-white/30 text-white hover:bg-white/10'
       }`}
     >
       {children}
-      <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
     </Link>
   );
 }
