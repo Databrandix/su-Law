@@ -30,16 +30,20 @@ function fmt(n: number): string {
  * The first semester starts open so the section never reads as an
  * unexplained stack of closed bars; the rest are collapsed to keep a
  * 44-course curriculum from burying the sections below it.
+ *
+ * Only one panel is open at a time — opening another closes the
+ * previous one, so the section keeps a predictable height instead of
+ * growing to eight stacked tables. Clicking the open panel closes it.
  */
 export default function CourseStructure({ groups }: { groups: SemesterGroup[] }) {
-  const [open, setOpen] = useState<Record<string, boolean>>(() =>
-    groups.length > 0 ? { [groups[0].slug]: true } : {},
+  const [openSlug, setOpenSlug] = useState<string | null>(
+    groups.length > 0 ? groups[0].slug : null,
   );
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-3">
       {groups.map((g) => {
-        const isOpen = open[g.slug] === true;
+        const isOpen = openSlug === g.slug;
         const panelId = `semester-${g.slug}`;
         return (
           <div key={g.slug} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
@@ -47,7 +51,7 @@ export default function CourseStructure({ groups }: { groups: SemesterGroup[] })
               type="button"
               aria-expanded={isOpen}
               aria-controls={panelId}
-              onClick={() => setOpen((prev) => ({ ...prev, [g.slug]: !prev[g.slug] }))}
+              onClick={() => setOpenSlug((prev) => (prev === g.slug ? null : g.slug))}
               className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-gray-50"
             >
               <span className="flex min-w-0 items-center gap-3">
