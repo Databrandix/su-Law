@@ -257,10 +257,18 @@ export default async function ProgramDetailPage({
                 ))}
 
                 {program.careerRoles.length > 0 && (
+                  // Round dot bullets rather than icons: a dozen repeated
+                  // check marks compete with the prose around them, where
+                  // a plain dot just marks the item. `mt-[0.6em]` keeps
+                  // the dot on the first line's optical centre when a
+                  // role wraps to two lines.
                   <ul className="flex flex-col gap-2.5">
                     {program.careerRoles.map((role) => (
                       <li key={role} className="flex items-start gap-3">
-                        <CheckCircle2 size={18} className="mt-1 shrink-0 text-accent" />
+                        <span
+                          aria-hidden="true"
+                          className="mt-[0.6em] size-1.5 shrink-0 rounded-full bg-accent"
+                        />
                         <span className="text-[15px] leading-[1.85] text-gray-700">
                           {role}
                         </span>
