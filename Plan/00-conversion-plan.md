@@ -3,8 +3,57 @@
 Converting the Sonargaon University **Department of Business Administration**
 template into the **Department of Law**.
 
-**Status:** Planning — nothing executed yet
-**Last updated:** 2026-08-08
+**Status:** Substantially complete — Phases 2–8 done, see the audit below
+**Last updated:** 2026-08-12
+
+> This document was written before execution and describes the plan as it
+> stood on 2026-08-08. It is kept as the record of intent; the section
+> immediately below is the verified state of the work as of 2026-08-12.
+
+---
+
+## Audit — 2026-08-12
+
+Every line here was checked against the running site and database, not
+against memory or the checkboxes further down.
+
+### Done
+
+| Phase | State |
+|---|---|
+| 2 — Identity & SEO | `SITE_NAME`, `SITE_URL`, `package.json`, `README`, `DepartmentIdentity` all read Law. OG banner replaced with a Law-branded image. |
+| 3 — Navigation | Nav, footer and quick-access carry no business labels. Third-level nav items are now editable from `/admin/nav`. |
+| 4 — Programs | 8 BA programmes → **LL.B** and **LL.M**, with fee structures, course structure and credit distribution. Syllabus rebuilt: 8 BA rows → 2 Law PDFs. |
+| 5 — People | 7 real Law faculty; 7 Law research areas; 27 research papers with no BA content. No BA faculty photos remain in `public/assets/`. |
+| 6 — Page content | Identity, home, news, newsletter, about pages, events, clubs and FAQs converted. Gallery rebuilt from the department's own photographs. |
+| 7 — Business Club | Resolved as **remove**: the `/about/business-club` page, its admin editor, API route, actions, schemas and table are gone. The club itself stays listed among the fifteen university-wide clubs. |
+| 8 — Assets | `src/lib/data.ts` dead arrays removed; no Business Club entry in the search index; sitemap has no business URLs. |
+| 9 — Verification | 46/46 sitemap routes return 200 · `tsc --noEmit` clean · `next build` succeeds · no residual business terms in `src/`. |
+
+### Outstanding — content the department still owes
+
+Not defects; nothing here is fabricated or guessed.
+
+- [ ] **Prospectus PDF** — the entry has a cover image but no file, so the card offers the cover instead
+- [ ] **Department Layout cover image** — the PDF is live, the cover is not
+- [ ] **SU Business Club card photo** — still a local placeholder shared with the Entrepreneurship Club
+- [ ] **News cover** — 1 of 3 articles still uses a placeholder image
+- [ ] **Notice Board** — the third sheet of `News-and-Events-Information.xlsx` is not imported
+- [ ] **FAQs 16, 17** — answers are correct for Law ("no English/Pharmacy/MSc programmes") but phrased for a BA audience; the department may prefer to reword or drop them
+
+### Outstanding — decisions and ops
+
+- [ ] **Phase 1 safety net was never built.** No `scripts/backup-db.ts`, no `Plan/backups/`. The conversion is finished, so its original purpose has passed, but the site now holds content that exists nowhere else — a backup is worth having on its own merits.
+- [ ] **Deploy.** Several commits are unpushed; CMS-visible changes only reach production after a deploy.
+
+### Deliberately not changed
+
+- The two university-wide notices naming BBA/MBA/EMBA — they list many departments, one names Law, and they are accurate announcements rather than leftovers.
+- `SU Business Club`'s name and description — it is a genuine university-wide club belonging to the BA department, and it stays listed with the other fourteen.
+- `/api/business-club/apply` — a shim that keeps the form working for browsers holding a cached bundle.
+- The university's brand colours.
+
+---
 
 ---
 
