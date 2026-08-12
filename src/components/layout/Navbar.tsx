@@ -394,8 +394,19 @@ export default function Navbar({
                 )}
                 {group.items.length > 0 && isOpen && (
                   <div className="pb-2 pl-3 flex flex-col gap-1">
-                    {group.items.map((child) => (
+                    {group.items.map((child) => {
+                      // Same rule as the desktop flyout: a row that has
+                      // children below it labels them rather than
+                      // linking anywhere of its own.
+                      const isHeading =
+                        (child.children?.length ?? 0) > 0 && !child.isDisabled;
+                      return (
                       <div key={child.id} className="flex flex-col">
+                        {isHeading ? (
+                          <span className="py-1.5 text-[13px] font-semibold text-gray-500">
+                            {child.name}
+                          </span>
+                        ) : (
                         <a
                           href={child.isDisabled ? '#' : child.href}
                           {...(child.isExternal && !child.isDisabled && { target: '_blank', rel: 'noopener noreferrer' })}
@@ -406,6 +417,7 @@ export default function Navbar({
                         >
                           {child.name}
                         </a>
+                        )}
                         {/* Third level — no hover on touch, so children are
                             simply indented under their parent. */}
                         {(child.children?.length ?? 0) > 0 && (
@@ -426,7 +438,8 @@ export default function Navbar({
                           </div>
                         )}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -543,14 +556,34 @@ function NavGroup({
             {group.items.map((child) => {
               const kids = child.children ?? [];
               const hasKids = kids.length > 0 && !child.isDisabled;
+              // An item that owns a flyout is a heading for the entries
+              // under it, not a destination of its own — "Undergraduate"
+              // groups the degrees, it is not a page. Rendering it as a
+              // link invites a click that goes somewhere unintended, so
+              // it becomes a plain button that only opens the flyout.
+              // (isDisabled is not the tool for this: it is what hides a
+              // flyout, so setting it would take the children with it.)
+              const Row = hasKids ? 'button' : 'a';
 
               return (
                 <div key={child.id} className="group/item relative">
-                  <a
-                    href={child.isDisabled ? '#' : child.href}
-                    {...(child.isExternal && !child.isDisabled && { target: '_blank', rel: 'noopener noreferrer' })}
-                    className={`block px-5 py-2.5 text-sm font-medium transition-colors ${
-                      child.isDisabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-accent/5 hover:text-accent'
+                  <Row
+                    {...(hasKids
+                      ? ({ type: 'button' } as const)
+                      : {
+                          href: child.isDisabled ? '#' : child.href,
+                          ...(child.isExternal &&
+                            !child.isDisabled && {
+                              target: '_blank',
+                              rel: 'noopener noreferrer',
+                            }),
+                        })}
+                    className={`block w-full text-left px-5 py-2.5 text-sm font-medium transition-colors ${
+                      child.isDisabled
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : hasKids
+                          ? 'text-gray-700 cursor-default hover:bg-accent/5 hover:text-accent'
+                          : 'text-gray-700 hover:bg-accent/5 hover:text-accent'
                     }`}
                     aria-disabled={child.isDisabled || undefined}
                     aria-haspopup={hasKids || undefined}
@@ -568,7 +601,7 @@ function NavGroup({
                         />
                       )}
                     </span>
-                  </a>
+                  </Row>
 
                   {/* Third level — flyout to the right of the parent row. */}
                   {hasKids && (
