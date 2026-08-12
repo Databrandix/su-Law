@@ -1,0 +1,15 @@
+-- Drops the About → Business Club page's table.
+--
+-- The page existed only because this site began as the Business
+-- Administration department's template, where SU Business Club was
+-- their flagship club and had a dedicated About entry. None of the
+-- other fourteen clubs has one, and the Law department's own societies
+-- (Moot Court, Law Club) are covered elsewhere.
+--
+-- The club itself is NOT removed: it remains one of the fifteen
+-- university-wide clubs listed at /student-society/club-list/business,
+-- with its own description restored to the department's wording.
+--
+-- The singleton row was deleted by scripts/remove-business-club-page.mjs
+-- before this migration; dropping the table removes the rest.
+DROP TABLE IF EXISTS "about_business_club";

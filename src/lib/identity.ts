@@ -236,10 +236,6 @@ export const getAboutMissionVision = cache(async () => {
   return prisma.aboutMissionVision.findUnique({ where: { id: 'singleton' } });
 });
 
-export const getAboutBusinessClub = cache(async () => {
-  return prisma.aboutBusinessClub.findUnique({ where: { id: 'singleton' } });
-});
-
 export const getAboutDepartmentLayout = cache(async () => {
   return prisma.aboutDepartmentLayout.findUnique({ where: { id: 'singleton' } });
 });

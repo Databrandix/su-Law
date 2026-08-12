@@ -82,9 +82,9 @@ const ABOUT_PAGES_NAV: NavItem[] = [
   { href: '/admin/about-mission-vision',  label: 'Mission & Vision', icon: Info },
   { href: '/admin/about-department-layout', label: 'Department Layout', icon: Info },
   // The two Law societies replace the Business Club page the template
-  // shipped with. Each edits one club's detail page, addressed by slug;
-  // the club's card row is edited under Student Society → Clubs. The
-  // Business Club route and editor still exist, just unlinked.
+  // shipped with, which has since been removed. Each edits one club's
+  // detail page, addressed by slug; the club's card row is edited under
+  // Student Society → Clubs.
   { href: '/admin/about-club/moot-court-society', label: 'SU Moot Court Society', icon: Trophy },
   { href: '/admin/about-club/law-club',           label: 'SU Law Club',           icon: Users2 },
 ];

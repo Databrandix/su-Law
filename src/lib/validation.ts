@@ -443,18 +443,7 @@ const statsArraySchema = z.array(
   z.object({ value: z.string().min(1), label: z.string().min(1) }),
 );
 
-const activitiesArraySchema = z.array(
-  z.object({
-    iconName:      z.string().min(1),
-    imageUrl:      z.string().min(1),
-    imagePublicId: optionalNullableString,
-    category:      z.string().min(1),
-    title:         z.string().min(1),
-    description:   z.string().min(1),
-  }),
-);
-
-// Same shape, but the photo is optional: the club detail page falls
+// The photo is optional: the club detail page falls
 // back to a gradient band with the activity icon when there is none,
 // and the societies have no activity photos yet. The editor serializes
 // a missing image as '', so allow the empty string rather than
@@ -470,30 +459,6 @@ const optionalImageActivitiesArraySchema = z.array(
   }),
 );
 
-export const aboutBusinessClubUpdateSchema = z.object({
-  heroTitle:                z.string().min(1).max(300),
-  heroOverline:             optionalNullableString,
-  heroImageUrl:             z.string().min(1),
-  heroImagePublicId:        optionalNullableString,
-  heroImageVerticalPercent: z.coerce.number().int().min(0).max(100).default(50),
-  introOverline:            optionalNullableString,
-  introHeading:             z.string().min(1),
-  introBody1:               z.string().min(1),
-  introBody2:               z.string().min(1),
-  introImageUrl:            z.string().min(1),
-  introImagePublicId:       optionalNullableString,
-  stats:                    statsArraySchema,
-  activitiesOverline:       optionalNullableString,
-  activitiesHeading:        z.string().min(1),
-  activities:               activitiesArraySchema,
-  networkOverline:          optionalNullableString,
-  networkHeading:           z.string().min(1),
-  networkBody:              z.string().min(1),
-  networkPrimaryCtaLabel:   z.string().min(1),
-  networkPrimaryCtaHref:    z.string().min(1),
-  networkSecondaryCtaLabel: optionalNullableString,
-  networkSecondaryCtaHref:  optionalNullableString,
-});
 
 // ════════════════════════════════════════════════════════════════
 //  PHASE 6 — Content hubs (News, Events, Notices, Gallery)

@@ -588,46 +588,6 @@ model AboutMissionVision {
   @@map("about_mission_vision")
 }
 
-model AboutBusinessClub {
-  id                       String   @id @default("singleton")
-  // Hero
-  heroTitle                String
-  heroOverline             String?
-  heroImageUrl             String
-  heroImagePublicId        String?
-  heroImageVerticalPercent Int      @default(50)
-  // Intro section
-  introOverline            String?
-  // introHeading allows inline HTML (e.g. <span class="text-gradient">)
-  // — rendered via dangerouslySetInnerHTML on the public side (J1
-  // pattern from Phase 2 messageParagraphs). Author trust is the
-  // operational control while audience is the chair.
-  introHeading             String
-  introBody1               String   @db.Text
-  introBody2               String   @db.Text
-  introImageUrl            String
-  introImagePublicId       String?
-  // Stats — variable-length [{ value, label }]
-  stats                    Json
-  // Activities section
-  activitiesOverline       String?
-  activitiesHeading        String
-  // Activities — variable-length [{ iconName, imageUrl, imagePublicId?, category, title, description }]
-  // iconName resolved against a curated Lucide IconMap at render
-  // time (same pattern as Phase 3 QuickAccessItem.iconName).
-  activities               Json
-  // Network section + 2 CTAs
-  networkOverline          String?
-  networkHeading           String
-  networkBody              String   @db.Text
-  networkPrimaryCtaLabel   String
-  networkPrimaryCtaHref    String
-  networkSecondaryCtaLabel String?
-  networkSecondaryCtaHref  String?
-  updatedAt                DateTime @updatedAt
-
-  @@map("about_business_club")
-}
 
 // ════════════════════════════════════════════════════════════════
 //  Phase 6 — Content hubs (News, Events, Notices, Gallery)
@@ -815,7 +775,7 @@ model Club {
   // renders as a card only, exactly as before — so the 13 inherited
   // university clubs are unaffected until someone fills these in.
   //
-  // Mirrors AboutBusinessClub's section layout (intro + stats,
+  // Mirrors the club detail layout (intro + stats,
   // activities, closing panel) so every club page reads the same, but
   // lives on the Club row instead of a per-club singleton table.
 
@@ -828,7 +788,7 @@ model Club {
   // Intro
   introOverline      String?
   // Allows inline HTML (e.g. <span class="text-gradient">), rendered
-  // through sanitizeHtml — same trust model as AboutBusinessClub.
+  // through sanitizeHtml — same trust model as the other rich-text fields.
   introHeading       String?
   introBody1         String?  @db.Text
   introBody2         String?  @db.Text
@@ -1518,7 +1478,7 @@ model NewsletterPage {
 }
 
 // Generic per-page hero CMS. Each public page that doesn't already
-// own a singleton with hero fields (AboutOverview, AboutBusinessClub,
+// own a singleton with hero fields (AboutOverview,
 // LegalPage, NewsLanding, ContactPageContent, NewsletterPage, etc.)
 // gets a row keyed by `pageKey` — that way the chair can change the
 // hero image + copy independently per page without N singleton
