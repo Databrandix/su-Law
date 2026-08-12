@@ -6,7 +6,7 @@ import EventsClient from './EventsClient';
 export const metadata = {
   title: 'Events — Department of Law',
   description:
-    'Departmental events from the BA at Sonargaon University — sports, industrial visits, seminars, exhibitions.',
+    'Departmental events from the Department of Law at Sonargaon University — seminars, court visits, workshops, and cultural programmes.',
 };
 
 export default async function EventsPage() {

@@ -8,7 +8,7 @@ import { sanitizeHtml } from '@/lib/sanitize-html';
 import { DynamicLucideIcon } from '@/components/ui/DynamicLucideIcon';
 
 export const metadata = {
-  title: 'Contact Us — Sonargaon University',
+  title: 'Contact Us',
   description:
     'Contact Sonargaon University — phone, email, website, Facebook, and campus addresses for Permanent, Green Road and Mohakhali campuses.',
 };

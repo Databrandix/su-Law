@@ -14,7 +14,7 @@ import { sanitizeHtml } from '@/lib/sanitize-html';
 import { DynamicLucideIcon } from '@/components/ui/DynamicLucideIcon';
 
 export const metadata = {
-  title: 'Transport Service — Sonargaon University',
+  title: 'Transport Service',
   description:
     "Sonargaon University's free bus service routes, timings, and contact numbers covering major areas across Dhaka.",
 };

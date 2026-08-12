@@ -44,7 +44,11 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(SITE_URL),
     title: {
       default: SITE_NAME,
-      template: '%s — Sonargaon University Law',
+      // Pages already end their own title with "— Department of Law",
+      // so appending the department again produced "… — Department of
+      // Law — Sonargaon University Law": the department named twice,
+      // trailing a dangling "Law". The suffix is the university alone.
+      template: '%s — Sonargaon University',
     },
     description: SITE_DESCRIPTION,
     alternates: {

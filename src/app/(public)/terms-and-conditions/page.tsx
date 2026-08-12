@@ -4,7 +4,7 @@ import LegalSections from '@/components/sections/LegalSections';
 import { getLegalPagesContent } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Terms & Conditions — Sonargaon University',
+  title: 'Terms & Conditions',
   description:
     'Terms & Conditions for the Department of Law, Sonargaon University — site usage, consent, log files, and how we use your information.',
 };

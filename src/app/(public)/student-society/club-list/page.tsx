@@ -6,7 +6,7 @@ import Container from '@/components/ui/Container';
 import { getClubs, getPageHero } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Club List — Sonargaon University',
+  title: 'Club List',
   description:
     'Student clubs and societies at Sonargaon University — cultural, technical, sports, and service clubs that enrich campus life.',
 };

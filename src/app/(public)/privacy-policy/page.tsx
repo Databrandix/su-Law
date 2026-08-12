@@ -4,7 +4,7 @@ import LegalSections from '@/components/sections/LegalSections';
 import { getLegalPagesContent } from '@/lib/identity';
 
 export const metadata = {
-  title: 'Privacy Policy — Sonargaon University',
+  title: 'Privacy Policy',
   description:
     'Privacy Policy for the Department of Law, Sonargaon University — how we handle visitor information and respect your consent.',
 };

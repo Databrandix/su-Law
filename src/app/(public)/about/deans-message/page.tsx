@@ -6,9 +6,9 @@ import MessageParagraphs from '@/components/sections/MessageParagraphs';
 import { getDean, getUniversityIdentity } from '@/lib/identity';
 
 export const metadata = {
-  title: "Dean's Message — Faculty of Science and Engineering",
+  title: "Dean's Message — Faculty of Arts and Humanities",
   description:
-    "Message from the Dean of the Faculty of Science and Engineering, Sonargaon University.",
+    "Message from the Dean of the Faculty of Arts and Humanities, Sonargaon University.",
 };
 
 const FALLBACK_HERO = '/assets/mission-vision-hero.webp';
