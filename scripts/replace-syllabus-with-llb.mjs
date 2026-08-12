@@ -36,9 +36,14 @@ const ROW = {
   shortTitle: 'LL.B (Honours)',
   department: 'Law',
   level: 'Undergraduate',
-  pdfFileName: 'Detail Syllabus of LLB (Honours) 4 Year 12 Semester',
+  // The uploaded file is named "...4 year_12  Semester...", but that
+  // filename is wrong: the PDF's own cover page states no semester
+  // count, and the curriculum lists eight (1st Year 1st Semester …
+  // 4th Year 2nd Semester). Program.duration agrees. Do not copy the
+  // figure back out of the filename.
+  pdfFileName: 'Detail Syllabus of LLB (Honours) 4 Year 8 Semester',
   summary:
-    'Detailed course-by-course syllabus for the LL.B (Honours) programme (4 Years · 12 Semesters).',
+    'Detailed course-by-course syllabus for the LL.B (Honours) programme (4 Years · 8 Semesters).',
   displayOrder: 0,
 };
 

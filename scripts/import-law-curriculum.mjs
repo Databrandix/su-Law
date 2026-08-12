@@ -33,7 +33,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { PrismaClient } from '@prisma/client';
 
-const SRC = 'C:/Users/Nabid Ahamed Noushad/Downloads/Programs_and_Course_Curriculum-Law-936ab462ff0543e53bb0c49d8f028baf (1).xlsx';
+const SRC = 'C:/Users/Nabid Ahamed Noushad/Downloads/Programs_and_Course_Curriculum-Law-936ab462ff0543e53bb0c49d8f028baf (2).xlsx';
 const COMMIT = process.argv.includes('--commit');
 
 // Workbook programme name -> site slug. Null = intentionally not
