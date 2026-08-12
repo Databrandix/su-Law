@@ -1,6 +1,12 @@
 /**
- * Shifts the Message-from-Head hero image down so the faces are fully
- * visible instead of being cut off at the top.
+ * Shifts a message hero image down so the faces are fully visible
+ * instead of being cut off at the top.
+ *
+ *   node scripts/fix-head-message-hero-crop.mjs [head|dean] [percent] [--commit]
+ *
+ * The Head's and the Dean's pages render the same fallback photograph
+ * through the same component but store their crop separately, so both
+ * have to be set or one page keeps the bad framing.
  *
  * The hero is a fixed-height band with the photo cropped to fill it,
  * and objectPosition decides which slice survives. The source is a
@@ -24,12 +30,19 @@ const COMMIT = process.argv.includes('--commit');
 // Overridable so the crop can be re-tuned by eye without editing this
 // file: node scripts/fix-head-message-hero-crop.mjs 70 --commit
 const arg = process.argv.slice(2).find((a) => /^\d+$/.test(a));
-const NEW_PERCENT = arg ? Number(arg) : 65;
+// 3% is what every other page carrying this photograph uses, arrived at
+// by eye against the rendered page — see the note above.
+const NEW_PERCENT = arg ? Number(arg) : 3;
+
+// Which message hero to adjust: the Head's page or the Dean's. Both
+// render the same fallback photograph through the same component, so
+// both need the same framing.
+const ROLE = process.argv.includes('dean') ? 'dean' : 'head';
 
 const prisma = new PrismaClient();
 
 const head = await prisma.faculty.findFirst({
-  where: { isHead: true },
+  where: ROLE === 'dean' ? { isDean: true } : { isHead: true },
   select: {
     id: true,
     name: true,
@@ -38,12 +51,12 @@ const head = await prisma.faculty.findFirst({
   },
 });
 if (!head) {
-  console.error('No faculty row flagged isHead — aborting.');
+  console.error(`No faculty row flagged is${ROLE === 'dean' ? 'Dean' : 'Head'} — aborting.`);
   await prisma.$disconnect();
   process.exit(1);
 }
 
-console.log(`Head: ${head.name}`);
+console.log(`${ROLE === 'dean' ? 'Dean' : 'Head'}: ${head.name}`);
 console.log(`  hero image : ${head.messageHeroImageUrl ?? '(fallback /assets/mission-vision-hero.webp)'}`);
 console.log(`  vertical   : ${head.messageHeroImageVerticalPercent}%  ->  ${NEW_PERCENT}%`);
 
