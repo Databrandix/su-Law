@@ -15,6 +15,8 @@ export type LinkRowShape = {
   href: string | null;
   isExternal: boolean;
   isDisabled: boolean;
+  /** Optional second nesting level; only the main nav uses it. */
+  parentId?: string | null;
 };
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -41,6 +43,9 @@ type Props<T extends LinkRowShape> = {
     valueOf: (item: T) => string;
     kind?: 'text' | 'icon';
   };
+  /** Enables the "Move under" select — the main nav's flyout level.
+   *  Omitted everywhere else, so those lists are unchanged. */
+  parentOptions?: { id: string; name: string }[];
 };
 
 export default function LinkListSection<T extends LinkRowShape>({
@@ -53,6 +58,7 @@ export default function LinkListSection<T extends LinkRowShape>({
   deleteAction,
   reorderAction,
   extraField,
+  parentOptions,
 }: Props<T>) {
   const router = useRouter();
   const confirm = useConfirm();
@@ -125,6 +131,7 @@ export default function LinkListSection<T extends LinkRowShape>({
         <RowForm
           mode="create"
           extraField={extraField}
+          parentOptions={parentOptions}
           onSubmit={handleCreate}
           onCancel={() => setAdding(false)}
         />
@@ -146,6 +153,9 @@ export default function LinkListSection<T extends LinkRowShape>({
                 mode="edit"
                 initial={item}
                 extraField={extraField}
+                // An item cannot be nested under itself, so it is not
+                // offered as a parent for its own edit form.
+                parentOptions={parentOptions?.filter((p) => p.id !== item.id)}
                 onSubmit={(fd) => handleUpdate(item.id, fd)}
                 onCancel={() => setEditingId(null)}
               />
@@ -153,6 +163,7 @@ export default function LinkListSection<T extends LinkRowShape>({
               <RowView
                 item={item}
                 extraField={extraField}
+                isChild={!!item.parentId}
                 onEdit={() => { setEditingId(item.id); setAdding(false); }}
                 onDelete={() => handleDelete(item.id, item.name)}
               />
@@ -167,11 +178,13 @@ export default function LinkListSection<T extends LinkRowShape>({
 function RowView<T extends LinkRowShape>({
   item,
   extraField,
+  isChild,
   onEdit,
   onDelete,
 }: {
   item: T;
   extraField?: Props<T>['extraField'];
+  isChild?: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -179,7 +192,20 @@ function RowView<T extends LinkRowShape>({
     <div className="flex items-center justify-between gap-3 min-w-0">
       <div className="min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Nested items are indented and badged: without this the
+              list reads as flat and there is no way to tell a flyout
+              child from a top-level dropdown item. */}
+          {isChild && (
+            <span className="text-gray-300 shrink-0 font-mono text-xs" aria-hidden="true">
+              └─
+            </span>
+          )}
           <span className="font-medium text-gray-900 truncate">{item.name}</span>
+          {isChild && (
+            <span className="text-[10px] uppercase tracking-wider bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded">
+              sub-item
+            </span>
+          )}
           {item.isDisabled && (
             <span className="text-[10px] uppercase tracking-wider bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">disabled</span>
           )}
@@ -222,12 +248,14 @@ function RowForm<T extends LinkRowShape>({
   mode,
   initial,
   extraField,
+  parentOptions,
   onSubmit,
   onCancel,
 }: {
   mode: 'create' | 'edit';
   initial?: T;
   extraField?: Props<T>['extraField'];
+  parentOptions?: Props<T>['parentOptions'];
   onSubmit: (fd: FormData) => Promise<void>;
   onCancel: () => void;
 }) {
@@ -283,6 +311,30 @@ function RowForm<T extends LinkRowShape>({
               className="w-full px-2.5 py-1.5 text-sm font-mono border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
             />
           )}
+        </div>
+      )}
+
+      {parentOptions && (
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">
+            Move under (optional)
+          </label>
+          <select
+            name="parentId"
+            defaultValue={initial?.parentId ?? ''}
+            className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+          >
+            <option value="">— Top level (shown directly in the dropdown) —</option>
+            {parentOptions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <p className="text-[11px] text-gray-500 mt-1">
+            Pick a parent to make this a sub-item, shown in a flyout when
+            that parent is hovered. Only one extra level is supported.
+          </p>
         </div>
       )}
 

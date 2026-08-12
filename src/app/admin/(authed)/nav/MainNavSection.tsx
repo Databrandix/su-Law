@@ -16,6 +16,34 @@ import { useConfirm } from '@/components/admin/ConfirmDialogProvider';
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
+type NavItem = MainNavGroupWithItems['items'][number];
+
+/**
+ * Flattens the item list so each child follows its own parent.
+ *
+ * The rows arrive ordered by displayOrder alone, which interleaves
+ * children with unrelated top-level items — the admin list then looks
+ * scrambled next to the menu it controls. Children are ordered among
+ * their siblings, so their displayOrder is only meaningful within a
+ * parent.
+ *
+ * Anything whose parent is missing from the group is appended rather
+ * than dropped, so a stray row is still visible and deletable.
+ */
+function orderWithChildren(items: NavItem[]): NavItem[] {
+  const byOrder = [...items].sort((a, b) => a.displayOrder - b.displayOrder);
+  const tops = byOrder.filter((i) => !i.parentId);
+  const topIds = new Set(tops.map((i) => i.id));
+
+  const out: NavItem[] = [];
+  for (const top of tops) {
+    out.push(top);
+    out.push(...byOrder.filter((i) => i.parentId === top.id));
+  }
+  out.push(...byOrder.filter((i) => i.parentId && !topIds.has(i.parentId)));
+  return out;
+}
+
 export default function MainNavSection({ groups: initialGroups }: { groups: MainNavGroupWithItems[] }) {
   const router = useRouter();
   const confirm = useConfirm();
@@ -121,8 +149,14 @@ export default function MainNavSection({ groups: initialGroups }: { groups: Main
                 <div className="mt-3 ml-6 border-l-2 border-gray-100 pl-4">
                   <LinkListSection
                     title="Items"
-                    description={group.hasDropdown ? 'Dropdown panel children.' : 'This group is a plain link — items here are ignored on the public site.'}
-                    items={group.items}
+                    description={group.hasDropdown ? 'Dropdown panel children. Use "Move under" to nest an item as a flyout sub-item.' : 'This group is a plain link — items here are ignored on the public site.'}
+                    items={orderWithChildren(group.items)}
+                    // Only top-level items can be parents: the renderer
+                    // draws a single flyout level, so offering a child
+                    // here would let an admin hide an item off the site.
+                    parentOptions={group.items
+                      .filter((i) => !i.parentId)
+                      .map((i) => ({ id: i.id, name: i.name }))}
                     createAction={(fd) => createMainNavItemAction(group.id, fd)}
                     updateAction={updateMainNavItemAction}
                     deleteAction={deleteMainNavItemAction}

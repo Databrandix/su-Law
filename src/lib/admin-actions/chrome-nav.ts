@@ -270,12 +270,55 @@ export async function reorderMainNavGroupsAction(ids: string[]): Promise<ActionR
 // ─────────────────────────────────────────────────────────────────
 
 function readItemRow(fd: FormData) {
+  // parentId: '' from the "— none —" option means top level, which the
+  // column stores as null.
+  const parent = getStr(fd, 'parentId');
   return {
     name:       getStr(fd, 'name'),
     href:       getStr(fd, 'href'),
     isExternal: readBoolCheckbox(fd, 'isExternal'),
     isDisabled: readBoolCheckbox(fd, 'isDisabled'),
+    parentId:   parent === '' ? null : parent,
   };
+}
+
+/**
+ * Checks a requested parent is a legal one.
+ *
+ * The form only ever offers same-group, top-level items, but the id
+ * arrives in FormData and a caller can send anything — so the rules are
+ * enforced here rather than trusted from the client:
+ *
+ *   - the parent must exist
+ *   - it must be in the same group, or the item would render under a
+ *     dropdown it does not belong to
+ *   - it must itself be top level: the renderer draws one flyout level
+ *     and ignores children of children, so a deeper nest would silently
+ *     hide the item
+ *   - it must not be the item itself, which would orphan it from the
+ *     tree and make it unreachable in the admin list
+ */
+async function validateParent(
+  parentId: string | null,
+  groupId: string,
+  selfId?: string,
+): Promise<ActionResult | null> {
+  if (parentId === null) return null;
+  if (selfId && parentId === selfId) {
+    return { ok: false, error: 'An item cannot be its own parent' };
+  }
+  const parent = await prisma.mainNavItem.findUnique({
+    where: { id: parentId },
+    select: { groupId: true, parentId: true },
+  });
+  if (!parent) return { ok: false, error: 'Parent item not found' };
+  if (parent.groupId !== groupId) {
+    return { ok: false, error: 'Parent must be in the same nav group' };
+  }
+  if (parent.parentId !== null) {
+    return { ok: false, error: 'Only one level of nesting is supported' };
+  }
+  return null;
 }
 
 function validateItemRow(row: ReturnType<typeof readItemRow>): ActionResult | null {
@@ -290,8 +333,12 @@ export async function createMainNavItemAction(groupId: string, formData: FormDat
   const row = readItemRow(formData);
   const invalid = validateItemRow(row);
   if (invalid) return invalid;
+  const badParent = await validateParent(row.parentId, groupId);
+  if (badParent) return badParent;
+  // Order within the sibling set: children are ordered among their own
+  // parent's children, not against the group's top-level items.
   const last = await prisma.mainNavItem.findFirst({
-    where: { groupId },
+    where: { groupId, parentId: row.parentId },
     orderBy: { displayOrder: 'desc' },
     select: { displayOrder: true },
   });
@@ -311,6 +358,26 @@ export async function updateMainNavItemAction(id: string, formData: FormData): P
   const row = readItemRow(formData);
   const invalid = validateItemRow(row);
   if (invalid) return invalid;
+
+  const current = await prisma.mainNavItem.findUnique({
+    where: { id },
+    select: { groupId: true, parentId: true, _count: { select: { children: true } } },
+  });
+  if (!current) return { ok: false, error: 'Nav item not found' };
+
+  const badParent = await validateParent(row.parentId, current.groupId, id);
+  if (badParent) return badParent;
+
+  // Moving an item that has children under another parent would push
+  // its own children to a third level, which the renderer does not
+  // draw — they would vanish from the site with no warning.
+  if (row.parentId !== null && current._count.children > 0) {
+    return {
+      ok: false,
+      error: `"Move under" is unavailable: this item has ${current._count.children} child item(s). Move or delete them first.`,
+    };
+  }
+
   try {
     await prisma.mainNavItem.update({ where: { id }, data: row });
   } catch (e: unknown) {
@@ -337,15 +404,31 @@ export async function deleteMainNavItemAction(id: string): Promise<ActionResult>
 export async function reorderMainNavItemsAction(groupId: string, ids: string[]): Promise<ActionResult> {
   const denied = await requireAuth();
   if (denied) return denied;
-  const existing = await prisma.mainNavItem.findMany({ where: { groupId }, select: { id: true } });
+  const existing = await prisma.mainNavItem.findMany({
+    where: { groupId },
+    select: { id: true, parentId: true },
+  });
   const existingIds = new Set(existing.map((r) => r.id));
   if (ids.length !== existingIds.size || !ids.every((id) => existingIds.has(id))) {
     return { ok: false, error: 'Reorder list must include exactly the existing items in this group' };
   }
+
+  // The admin list shows children inline under their parents, so the
+  // dragged order mixes both levels. displayOrder ranks an item among
+  // its SIBLINGS, so numbering the flat list 0..n would interleave the
+  // two levels and scramble the menu. Each parent group is numbered
+  // separately, preserving the dragged sequence within each.
+  const parentOf = new Map(existing.map((r) => [r.id, r.parentId]));
+  const counters = new Map<string, number>();
+  const updates = ids.map((id) => {
+    const key = parentOf.get(id) ?? '__top__';
+    const next = counters.get(key) ?? 0;
+    counters.set(key, next + 1);
+    return prisma.mainNavItem.update({ where: { id }, data: { displayOrder: next } });
+  });
+
   try {
-    await prisma.$transaction(
-      ids.map((id, index) => prisma.mainNavItem.update({ where: { id }, data: { displayOrder: index } })),
-    );
+    await prisma.$transaction(updates);
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'Database error' };
   }
