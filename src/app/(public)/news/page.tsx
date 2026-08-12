@@ -9,7 +9,7 @@ import { sanitizeHtml } from '@/lib/sanitize-html';
 export const metadata = {
   title: 'News — Department of Law',
   description:
-    'Latest news from the Department of Law, Sonargaon University — events, workshops, industrial visits, and academic milestones.',
+    'Latest news from the Department of Law, Sonargaon University — seminars, competitions, court visits, and academic milestones.',
 };
 
 const FALLBACK_HERO_IMAGE = '/assets/mission-vision-hero.webp';
