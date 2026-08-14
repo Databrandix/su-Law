@@ -630,3 +630,22 @@ export const getAdmissionLeadPopup = cache(
     };
   },
 );
+
+// ─────────────────────────────────────────────────────────────────
+//  Nav-driven page availability
+//    A page can be taken offline by ticking "Disabled" on its
+//    /admin/nav entry. The navbar already greys the link out; this
+//    lets the page itself honour the same flag, so one checkbox both
+//    hides the menu item and stops the URL rendering. Without it a
+//    disabled link still left the page reachable by typing the URL,
+//    from search, or from the sitemap.
+// ─────────────────────────────────────────────────────────────────
+
+export const isNavPathDisabled = cache(async (href: string): Promise<boolean> => {
+  const item = await prisma.mainNavItem.findFirst({
+    where: { href },
+    select: { isDisabled: true },
+  });
+  // No nav entry → the page is not nav-managed, so it stays available.
+  return item?.isDisabled ?? false;
+});

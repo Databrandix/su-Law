@@ -364,7 +364,25 @@ export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
     type: 'Scholarship',
   }));
 
-  return [
+  // A page taken offline via its /admin/nav "Disabled" checkbox must
+  // also leave search, otherwise the overlay keeps offering a result
+  // that now 404s. Applied to the whole list rather than one page, so
+  // any future disable behaves the same way.
+  const disabledHrefs = new Set(
+    (
+      await prisma.mainNavItem.findMany({
+        where: { isDisabled: true },
+        select: { href: true },
+      })
+    ).map((i) => i.href),
+  );
+
+  const visible = (items: SearchItem[]) =>
+    disabledHrefs.size === 0
+      ? items
+      : items.filter((i) => !disabledHrefs.has(i.href));
+
+  return visible([
     ...staticPages,
     ...facultyItems,
     ...programItems,
@@ -386,7 +404,7 @@ export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
     ...transferCreditsItems,
     ...waiverCategoryItems,
     ...scholarshipItems,
-  ];
+  ]);
 });
 
 // search() lives in '@/lib/search' so client bundles can use it

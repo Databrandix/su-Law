@@ -38,22 +38,31 @@ const staticRoutes: { path: string; priority: number; changeFrequency: 'weekly' 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const [facultyRows, eventRows, newsRows, programRows, clubRows] = await Promise.all([
-    prisma.faculty.findMany({ select: { slug: true } }),
-    prisma.event.findMany({ select: { slug: true } }),
-    prisma.news.findMany({ select: { slug: true } }),
-    prisma.program.findMany({ where: { slug: { not: null } }, select: { slug: true } }),
-    // Only clubs with detail content have a page — the rest are cards
-    // on the listing and would 404 here.
-    prisma.club.findMany({ where: { introHeading: { not: null } }, select: { slug: true } }),
-  ]);
+  const [facultyRows, eventRows, newsRows, programRows, clubRows, disabledNav] =
+    await Promise.all([
+      prisma.faculty.findMany({ select: { slug: true } }),
+      prisma.event.findMany({ select: { slug: true } }),
+      prisma.news.findMany({ select: { slug: true } }),
+      prisma.program.findMany({ where: { slug: { not: null } }, select: { slug: true } }),
+      // Only clubs with detail content have a page — the rest are cards
+      // on the listing and would 404 here.
+      prisma.club.findMany({ where: { introHeading: { not: null } }, select: { slug: true } }),
+      // Pages switched off via their /admin/nav "Disabled" checkbox now
+      // answer 404, so listing them would advertise dead URLs to search
+      // engines.
+      prisma.mainNavItem.findMany({ where: { isDisabled: true }, select: { href: true } }),
+    ]);
 
-  const statics: MetadataRoute.Sitemap = staticRoutes.map(({ path, priority, changeFrequency }) => ({
-    url: `${BASE_URL}${path}`,
-    lastModified: now,
-    changeFrequency,
-    priority,
-  }));
+  const disabledPaths = new Set(disabledNav.map((i) => i.href));
+
+  const statics: MetadataRoute.Sitemap = staticRoutes
+    .filter(({ path }) => !disabledPaths.has(path))
+    .map(({ path, priority, changeFrequency }) => ({
+      url: `${BASE_URL}${path}`,
+      lastModified: now,
+      changeFrequency,
+      priority,
+    }));
 
   const facultyPages: MetadataRoute.Sitemap = facultyRows.map((m) => ({
     url: `${BASE_URL}/faculty-member/${m.slug}`,

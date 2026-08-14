@@ -1296,7 +1296,10 @@ model CampusLocation {
   tag          String?                             // "City Campus-1"
   address      String   @db.Text
   phone        String?
-  email        String
+  // Optional, matching `phone` above: a campus that publishes no
+  // e-mail simply renders without the line, rather than forcing an
+  // address to be invented for it.
+  email        String?
   // Optional Google Maps URL (e.g. maps.app.goo.gl/... share link) for
   // the campus pin. Footer + contact page prefer this when present;
   // they fall back to an address-based maps.google.com/?q= search.

@@ -40,7 +40,8 @@ function readCampusRow(formData: FormData) {
     tag:     emptyToNull(formData.get('tag')),
     address: getStr(formData, 'address'),
     phone:   emptyToNull(formData.get('phone')),
-    email:   getStr(formData, 'email'),
+    // Optional now — an empty field must clear the column, not save ''.
+    email:   emptyToNull(formData.get('email')),
     mapsUrl: emptyToNull(formData.get('mapsUrl')),
   };
 }

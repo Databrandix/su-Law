@@ -1,7 +1,18 @@
+import { notFound } from 'next/navigation';
 import PageShell from '@/components/layout/PageShell';
 import Container from '@/components/ui/Container';
-import { getSyllabi, getPageHero } from '@/lib/identity';
+import { getSyllabi, getPageHero, isNavPathDisabled } from '@/lib/identity';
 import SyllabusClient from './SyllabusClient';
+
+const NAV_HREF = '/student-society/syllabus';
+
+// This page's availability is a DB flag that can flip at any moment, so
+// it opts out of the (public) layout's `revalidate = 3600`. Two reasons:
+// a statically cached copy would keep serving for up to an hour after
+// the page is switched back on, and notFound() rendered into the ISR
+// cache is replayed as a 200 — telling crawlers a disabled page is fine.
+// Dynamic rendering makes the toggle immediate and the 404 honest.
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Syllabus — Department of Law',
@@ -10,6 +21,12 @@ export const metadata = {
 };
 
 export default async function SyllabusPage() {
+  // Taking the page offline is a content decision, so it is driven by
+  // the "Disabled" checkbox on this page's /admin/nav entry rather than
+  // by a code edit — the same flag that greys the menu item out. Untick
+  // it there and the page returns; nothing here needs changing.
+  if (await isNavPathDisabled(NAV_HREF)) notFound();
+
   const [items, hero] = await Promise.all([
     getSyllabi(),
     getPageHero('student-society-syllabus'),

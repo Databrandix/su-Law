@@ -68,7 +68,9 @@ export default function CampusLocationList({ items: initialItems }: { items: Cam
             </div>
             <div className="text-xs text-gray-500 truncate">{c.address}</div>
             <div className="text-xs text-gray-400 truncate mt-0.5">
-              {c.email}{c.phone && ` · ${c.phone}`}
+              {/* Either may be absent now, so the separator is only
+                  drawn when there is something on both sides. */}
+              {[c.email, c.phone].filter(Boolean).join(' · ')}
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">

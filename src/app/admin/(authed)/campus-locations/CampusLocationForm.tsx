@@ -42,7 +42,7 @@ export default function CampusLocationForm({ initial }: { initial: CampusLocatio
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <TextField label="Phone (optional)" name="phone"
                      defaultValue={initial?.phone ?? ''} placeholder="+880241010352" />
-          <TextField label="Email" name="email" required type="email"
+          <TextField label="Email (optional)" name="email" type="email"
                      defaultValue={initial?.email ?? ''} placeholder="info@su.edu.bd" />
         </div>
         <TextField

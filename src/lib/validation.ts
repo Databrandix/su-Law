@@ -1204,7 +1204,10 @@ export const campusLocationCreateSchema = z.object({
   tag:     optionalNullableString,
   address: z.string().min(1),
   phone:   optionalNullableString,
-  email:   z.string().email().max(320),
+  // Optional, like `phone` above. Blank submits as '' and must reach
+  // the column as null, so an empty field clears the address instead of
+  // failing the e-mail format check.
+  email:   z.string().email().max(320).nullable().optional().or(z.literal('').transform(() => null)),
   mapsUrl: optionalNullableString,
 });
 
