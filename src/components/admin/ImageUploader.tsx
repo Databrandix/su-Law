@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { FileText, ImageOff, X } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -131,6 +131,18 @@ type Props = {
    * callers that only accept (url, publicId) keep working unchanged.
    */
   onChange?: (url: string, publicId: string, meta?: UploadMeta) => void;
+  /**
+   * Fires whenever an upload starts or finishes, so a parent form can
+   * block submission while a file is still in flight.
+   *
+   * This is not cosmetic: signing + the Cloudinary round-trip can take
+   * many seconds (a cold dev build has been seen at 60s+), and a form
+   * submitted during that window saves the *previous* empty URL and
+   * silently discards the file the admin just picked.
+   *
+   * Optional — every existing caller keeps its current behaviour.
+   */
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 export default function ImageUploader({
@@ -145,6 +157,7 @@ export default function ImageUploader({
   accept = 'image/*',
   recommendedSize,
   onChange,
+  onUploadingChange,
 }: Props) {
   // Resolve hint: explicit override (including `null` to suppress)
   // wins over the per-kind default.
@@ -169,6 +182,13 @@ export default function ImageUploader({
   );
   const fileRef = useRef<HTMLInputElement>(null);
   const qualityGroupId = useId();
+
+  // Mirrored to the parent via an effect rather than from inside
+  // handleFile, so the "finished" edge still fires when an upload ends
+  // by throwing.
+  useEffect(() => {
+    onUploadingChange?.(uploading);
+  }, [uploading, onUploadingChange]);
   // Hide the quality radio when the form is PDF-only — f_auto/q_auto
   // have no useful effect on PDFs. Mixed image+pdf forms (e.g. Phase 6
   // notice-file) keep the radio because images go through it.

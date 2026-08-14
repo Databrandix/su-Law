@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ProspectusEntry } from '@prisma/client';
 import ImageUploader from '@/components/admin/ImageUploader';
@@ -28,6 +28,18 @@ export default function ProspectusForm({ initial }: { initial: ProspectusEntry |
     fileName: initial?.pdfFileName ?? '',
   });
 
+  // Saving mid-upload writes the pre-upload (empty) URL and throws the
+  // file away without any error — the failure looks like a successful
+  // save. Both uploaders report their state here so the button can wait.
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const uploading = coverUploading || pdfUploading;
+
+  // Stable identities: ImageUploader mirrors this prop from an effect,
+  // so a new function each render would re-fire it on every keystroke.
+  const handleCoverUploading = useCallback((v: boolean) => setCoverUploading(v), []);
+  const handlePdfUploading = useCallback((v: boolean) => setPdfUploading(v), []);
+
   useEffect(() => {
     if (state.ok === true) toast.success(isEdit ? 'Prospectus saved' : 'Prospectus created');
     if (state.ok === false) toast.error(state.error);
@@ -52,17 +64,24 @@ export default function ProspectusForm({ initial }: { initial: ProspectusEntry |
       <Card title="Cover image">
         <ImageUploader kind="prospectus-cover" name="cover"
                        initialUrl={initial?.coverUrl}
-                       initialPublicId={initial?.coverPublicId} />
+                       initialPublicId={initial?.coverPublicId}
+                       onUploadingChange={handleCoverUploading} />
       </Card>
 
-      <Card title="Prospectus PDF">
+      <Card title="Prospectus file">
         <p className="text-xs text-gray-500 -mt-2">
-          The &ldquo;Download&rdquo; button on the public card links to this PDF.
+          The &ldquo;Download&rdquo; button on the public card links to this
+          file. A PDF or an image both work &mdash; use an image when the
+          prospectus is a single scanned page. Leave it empty and the button
+          falls back to the cover image above.
         </p>
         <ImageUploader
           kind="prospectus-pdf"
           name="pdf"
-          accept="application/pdf"
+          // Same mixed accept the notice-file uploader uses. The public
+          // card downloads through Cloudinary's attachment flag, which is
+          // format-agnostic, so an image saves just as a PDF does.
+          accept="image/*,application/pdf"
           initialUrl={pdf.url}
           initialPublicId={pdf.publicId}
           initialFileType="pdf"
@@ -70,6 +89,7 @@ export default function ProspectusForm({ initial }: { initial: ProspectusEntry |
           onChange={(url, publicId, meta) => {
             setPdf({ url, publicId, fileName: meta?.fileName ?? '' });
           }}
+          onUploadingChange={handlePdfUploading}
         />
         <input type="hidden" name="pdfUrl" value={pdf.url} />
         <input type="hidden" name="pdfPublicId" value={pdf.publicId} />
@@ -86,10 +106,17 @@ export default function ProspectusForm({ initial }: { initial: ProspectusEntry |
         <Link href="/admin/prospectus-entries" className="px-4 py-2.5 text-gray-700 hover:text-gray-900 font-medium text-sm transition-colors">
           ← Back to prospectus entries
         </Link>
-        <button type="submit" disabled={pending}
-                className="bg-primary hover:bg-primary/90 text-white font-medium rounded-lg px-5 py-2.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent/40">
-          {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create prospectus'}
-        </button>
+        <div className="flex items-center gap-3">
+          {uploading && (
+            <span className="text-xs font-medium text-amber-700">
+              Upload in progress — wait before saving.
+            </span>
+          )}
+          <button type="submit" disabled={pending || uploading}
+                  className="bg-primary hover:bg-primary/90 text-white font-medium rounded-lg px-5 py-2.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent/40">
+            {uploading ? 'Uploading…' : pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create prospectus'}
+          </button>
+        </div>
       </div>
     </form>
   );
