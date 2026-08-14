@@ -46,6 +46,8 @@ import {
   Building,
   Rocket,
   ShieldCheck,
+  MousePointerClick,
+  Inbox,
 } from 'lucide-react';
 import { useConfirm } from './ConfirmDialogProvider';
 
@@ -131,6 +133,11 @@ const ADMISSION_NAV: NavItem[] = [
   { href: '/admin/waiver-scholarship-landing', label: 'Waiver/Scholarship Landing', icon: Layers },
   { href: '/admin/waiver-categories',          label: 'Waiver Categories',     icon: HeartHandshake },
   { href: '/admin/scholarships',               label: 'Scholarships',          icon: Trophy },
+  // Homepage lead popup — its settings and the enquiries it collects.
+  // Filed under Admission rather than its own group because that is
+  // whose work the list is.
+  { href: '/admin/admission-lead-popup',       label: 'Lead Popup',            icon: MousePointerClick },
+  { href: '/admin/admission-leads',            label: 'Admission Leads',       icon: Inbox },
 ];
 
 export default function Sidebar({

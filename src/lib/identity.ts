@@ -552,3 +552,81 @@ export const getHomeOverview = cache(async () => {
 export const getLegalPagesContent = cache(async () => {
   return prisma.legalPagesContent.findUnique({ where: { id: 'singleton' } });
 });
+
+// ─────────────────────────────────────────────────────────────────
+//  Admission lead popup
+//    One resolver shared by the homepage (which renders the popup)
+//    and /api/admission-leads/submit (which re-checks the posted
+//    programme against the same list). Keeping both on this function
+//    is what makes the allow-list check meaningful — if they read the
+//    options separately they could disagree and reject valid picks.
+// ─────────────────────────────────────────────────────────────────
+
+export type AdmissionLeadPopupConfig = {
+  isEnabled: boolean;
+  delaySeconds: number;
+  redisplayAfterHours: number;
+  heading: string;
+  subheading: string;
+  nameLabel: string;
+  namePlaceholder: string;
+  mobileLabel: string;
+  mobilePlaceholder: string;
+  programmeLabel: string;
+  programmePlaceholder: string;
+  submitLabel: string;
+  footerNote: string;
+  /** Already resolved — CMS list when set, Program table otherwise. */
+  programmeOptions: string[];
+};
+
+export const getAdmissionLeadPopup = cache(
+  async (): Promise<AdmissionLeadPopupConfig | null> => {
+    const row = await prisma.admissionLeadPopup.findUnique({
+      where: { id: 'singleton' },
+    });
+    // Row absent (migration not applied on this environment) → no
+    // popup rather than a crash on the homepage.
+    if (!row) return null;
+
+    // An empty CMS list means "track the Program table", so a newly
+    // published degree appears in the dropdown with no admin edit.
+    const custom = Array.isArray(row.programmeOptions)
+      ? (row.programmeOptions as unknown[])
+          .filter((v): v is string => typeof v === 'string')
+          .map((v) => v.trim())
+          .filter((v) => v.length > 0)
+      : [];
+
+    let programmeOptions = custom;
+    if (programmeOptions.length === 0) {
+      const programs = await prisma.program.findMany({
+        orderBy: { displayOrder: 'asc' },
+        select: { programName: true, degreeCode: true },
+      });
+      programmeOptions = programs.map((p) => {
+        // "Bachelor of Laws" + "LL.B" → "Bachelor of Laws (LL.B.)",
+        // the same label the nav flyout used to show.
+        const code = p.degreeCode ? p.degreeCode.replace(/\.?$/, '.') : null;
+        return code ? `${p.programName} (${code})` : p.programName;
+      });
+    }
+
+    return {
+      isEnabled:            row.isEnabled,
+      delaySeconds:         row.delaySeconds,
+      redisplayAfterHours:  row.redisplayAfterHours,
+      heading:              row.heading,
+      subheading:           row.subheading,
+      nameLabel:            row.nameLabel,
+      namePlaceholder:      row.namePlaceholder,
+      mobileLabel:          row.mobileLabel,
+      mobilePlaceholder:    row.mobilePlaceholder,
+      programmeLabel:       row.programmeLabel,
+      programmePlaceholder: row.programmePlaceholder,
+      submitLabel:          row.submitLabel,
+      footerNote:           row.footerNote,
+      programmeOptions,
+    };
+  },
+);

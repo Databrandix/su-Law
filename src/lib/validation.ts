@@ -1239,3 +1239,74 @@ export const journeyCTAContentUpdateSchema = z.object({
   secondaryCtaHref:     z.string().min(1).max(500),
   secondaryCtaExternal: z.boolean().optional().default(false),
 });
+
+// ─────────────────────────────────────────────────────────────────
+//  Admission lead popup — singleton CMS + public submit + admin status
+//    The popup that opens on the homepage after a dwell delay. Copy,
+//    timing and dropdown options are all CMS-driven; the leads it
+//    collects are DB-only (no email leg, same as NewsletterSubscriber).
+// ─────────────────────────────────────────────────────────────────
+
+export const admissionLeadStatusEnum = z.enum([
+  'new',
+  'contacted',
+  'enrolled',
+  'dropped',
+]);
+
+export const admissionLeadStatusUpdateSchema = z.object({
+  status: admissionLeadStatusEnum,
+});
+
+// Dropdown options the admin manages as a list of plain strings.
+// Blank rows are dropped rather than rejected, so an empty row left
+// behind in the editor can't block an otherwise valid save.
+const programmeOptionsSchema = z
+  .array(z.string().max(200))
+  .max(50)
+  .transform((arr) => arr.map((s) => s.trim()).filter((s) => s.length > 0));
+
+export const admissionLeadPopupUpdateSchema = z.object({
+  isEnabled:            z.boolean().optional().default(true),
+  // Dwell time before the popup opens. 0 is allowed (open at once);
+  // the 600s ceiling stops a typo from parking it past any real visit.
+  delaySeconds:         z.coerce.number().int().min(0).max(600).default(15),
+  // How long a dismissal suppresses the popup. 0 = show again on the
+  // next page load; the ceiling is one year.
+  redisplayAfterHours:  z.coerce.number().int().min(0).max(8760).default(24),
+  heading:              z.string().trim().min(1).max(300),
+  subheading:           z.string().trim().min(1).max(600),
+  nameLabel:            z.string().trim().min(1).max(120),
+  namePlaceholder:      z.string().trim().min(1).max(120),
+  mobileLabel:          z.string().trim().min(1).max(120),
+  mobilePlaceholder:    z.string().trim().min(1).max(120),
+  programmeLabel:       z.string().trim().min(1).max(120),
+  programmePlaceholder: z.string().trim().min(1).max(120),
+  submitLabel:          z.string().trim().min(1).max(120),
+  footerNote:           z.string().trim().min(1).max(300),
+  programmeOptions:     programmeOptionsSchema,
+});
+
+// Bangladeshi mobile number. Accepts the shapes people actually type
+// — 01712345678, +8801712345678, 8801712345678, and any of those with
+// spaces or dashes — then stores the bare 11-digit local form so the
+// admin list and any future dedupe see one canonical value.
+const bangladeshiMobileSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(30)
+  .transform((v) => v.replace(/[\s()-]/g, ''))
+  .refine((v) => /^(?:\+?88)?01[3-9]\d{8}$/.test(v), {
+    message: 'Enter a valid Bangladeshi mobile number, e.g. 01712345678',
+  })
+  .transform((v) => v.replace(/^\+?88/, ''));
+
+// Public popup submit. `programme` arrives as the option's label and
+// is re-checked against the live option list in the route before it
+// is written, so this schema only bounds its shape.
+export const admissionLeadCreateSchema = z.object({
+  fullName:  z.string().trim().min(1).max(200),
+  mobile:    bangladeshiMobileSchema,
+  programme: z.string().trim().min(1).max(200),
+});

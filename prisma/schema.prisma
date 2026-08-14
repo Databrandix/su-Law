@@ -1558,3 +1558,69 @@ model NewsletterSubscriber {
   @@index([status, createdAt])
   @@map("newsletter_subscriber")
 }
+
+// ─────────────────────────────────────────────────────────────────
+//  Admission lead popup — timed lead capture on the homepage
+//    Singleton CMS (timing + copy + dropdown options) plus the leads
+//    it collects. DB-only like NewsletterSubscriber: the admission
+//    team works the list from /admin/admission-leads, no email leg.
+// ─────────────────────────────────────────────────────────────────
+
+model AdmissionLeadPopup {
+  id                   String   @id @default("singleton")
+
+  // Master switch + timing. delaySeconds is how long a visitor must
+  // stay on the homepage before the popup opens. redisplayAfterHours
+  // is how long a *dismissal* is honoured before it may appear again;
+  // a visitor who actually submits is never shown it again (the client
+  // keeps a separate permanent flag, so this value does not apply).
+  isEnabled            Boolean  @default(true)
+  delaySeconds         Int      @default(15)
+  redisplayAfterHours  Int      @default(24)
+
+  // Every string in the popup is editable, so the pitch can be retuned
+  // without a deploy. Defaults reproduce the approved design.
+  heading              String   @default("Start your journey with Sonargaon University")
+  subheading           String   @default("Get personalized admission guidance from our admission team.") @db.Text
+  nameLabel            String   @default("Full name")
+  namePlaceholder      String   @default("As written on your certificate")
+  mobileLabel          String   @default("Mobile number")
+  mobilePlaceholder    String   @default("01XXXXXXXXX")
+  programmeLabel       String   @default("Programme you are interested in")
+  programmePlaceholder String   @default("Choose a programme")
+  submitLabel          String   @default("Get admission guidance")
+  footerNote           String   @default("Our admission team will contact you shortly.")
+
+  // programmeOptions — Json string[] backing the dropdown. An empty
+  // array falls back to the Program table at render time, so a newly
+  // added degree appears without anyone editing this row; a non-empty
+  // array overrides it when the chair wants a bespoke list.
+  programmeOptions     Json     @default("[]")
+
+  updatedAt            DateTime @updatedAt
+
+  @@map("admission_lead_popup")
+}
+
+model AdmissionLead {
+  id         String   @id @default(cuid())
+  fullName   String
+  mobile     String
+  // The resolved option label, not an id. The submit route checks the
+  // posted value against the live option list before writing, so a
+  // spoofed programme never reaches this column — the same guard
+  // BusinessClubApplication.clubName uses.
+  programme  String
+  // status — 'new' | 'contacted' | 'enrolled' | 'dropped'. String
+  // rather than an enum, matching ContactSubmission.status.
+  status     String   @default("new")
+  // Forensics — first hop from x-forwarded-for / raw UA header.
+  ipAddress  String?
+  userAgent  String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@map("admission_lead")
+}

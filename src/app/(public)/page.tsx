@@ -9,6 +9,7 @@ import {
   getNewsHomeTop,
   getEventsHomeTop,
   getNoticesHomeTop,
+  getAdmissionLeadPopup,
 } from '@/lib/identity';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 
@@ -42,9 +43,12 @@ const NewsSection = dynamic(() => import('@/components/sections/NewsSection'), {
 const ServicesSection = dynamic(() => import('@/components/sections/ServicesSection'), {
   loading: sectionSkeleton('min-h-[400px]'),
 });
+// Renders nothing until its dwell timer fires, so it carries no
+// skeleton — a placeholder would reserve space for an overlay.
+const AdmissionLeadPopup = dynamic(() => import('@/components/forms/AdmissionLeadPopup'));
 
 export default async function HomePage() {
-  const [dept, overview, programs, researchAreas, newsTop, eventsTop, noticesTop] = await Promise.all([
+  const [dept, overview, programs, researchAreas, newsTop, eventsTop, noticesTop, leadPopup] = await Promise.all([
     getDepartmentIdentity(),
     getHomeOverview(),
     getProgramsHomeTop(),
@@ -53,6 +57,7 @@ export default async function HomePage() {
     getNewsHomeTop(),
     getEventsHomeTop(),
     getNoticesHomeTop(),
+    getAdmissionLeadPopup(),
   ]);
   return (
     <>
@@ -89,7 +94,7 @@ export default async function HomePage() {
           }}
         />
       )}
-      <ProgramsSection programs={programs} showAllLink />
+      <ProgramsSection programs={programs} />
       <QuickLinksSection />
       <NoticesSection notices={noticesTop} />
 
@@ -97,6 +102,12 @@ export default async function HomePage() {
       <EventsSection events={eventsTop} />
       <NewsSection news={newsTop} />
       <ServicesSection />
+      {/* Timed lead capture. Skipped entirely when the chair has
+          switched it off or there is no programme to offer, so the
+          client bundle for it is never requested in those cases. */}
+      {leadPopup?.isEnabled && leadPopup.programmeOptions.length > 0 && (
+        <AdmissionLeadPopup config={leadPopup} />
+      )}
     </>
   );
 }

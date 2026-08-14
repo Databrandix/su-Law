@@ -39,9 +39,8 @@ type ProgramsSectionProps = {
   programs: readonly ProgramRow[];
   /**
    * Renders the animated chevron that leads to the full listing.
-   * On the homepage only one program per tier is passed, so the
-   * chevron is how visitors reach the rest; /programs already shows
-   * everything and passes false.
+   * Off everywhere at present: /programs already is the full list,
+   * and the homepage reaches it through the Program nav link instead.
    */
   showAllLink?: boolean;
   allLinkHref?: string;

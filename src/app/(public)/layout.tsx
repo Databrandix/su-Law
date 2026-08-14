@@ -3,6 +3,7 @@ import Footer from '@/components/layout/Footer';
 import JourneyCTASection from '@/components/sections/JourneyCTASection';
 import InitialSplash from '@/components/common/InitialSplash';
 import PublicNavigationOverlay from '@/components/common/PublicNavigationOverlay';
+import ToasterClient from '@/components/common/ToasterClient';
 import PageFadeWrapper from '@/components/layout/PageFadeWrapper';
 import {
   getDepartmentIdentity,
@@ -84,6 +85,12 @@ export default async function PublicLayout({
           shows on every public page transition, not just on slow
           Suspense fetches. */}
       <PublicNavigationOverlay />
+
+      {/* Public forms (newsletter subscribe, join-club) report success
+          and failure through sonner. Without a Toaster mounted here
+          those calls are no-ops, which made a failed submit look like
+          nothing happened at all. */}
+      <ToasterClient />
 
       <Navbar
         logoUrl={dept.logoUrl}
