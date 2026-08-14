@@ -318,6 +318,7 @@ export const uploadKindSchema = z.enum([
   'club-image',
   'visitor-photo',
   'syllabus-pdf',
+  'syllabus-cover',
   // Phase 8a
   'admission-notice-hero',
   'admission-notice-file',
@@ -797,6 +798,10 @@ export const syllabusCreateSchema = z.object({
   pdfUrl:        optionalNullableString,
   pdfPublicId:   optionalNullableString,
   pdfFileName:   optionalNullableString,
+  // Optional override for the card thumbnail. Null keeps the derived
+  // page-1-of-the-PDF cover.
+  coverUrl:      optionalNullableString,
+  coverPublicId: optionalNullableString,
   summary:       optionalNullableString,
 });
 

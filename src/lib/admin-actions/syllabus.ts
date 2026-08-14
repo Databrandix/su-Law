@@ -40,6 +40,10 @@ function readSyllabusRow(formData: FormData) {
     pdfUrl:        emptyToNull(formData.get('pdfUrl')),
     pdfPublicId:   emptyToNull(formData.get('pdfPublicId')),
     pdfFileName:   emptyToNull(formData.get('pdfFileName')),
+    // The cover ImageUploader has no onChange, so it renders its own
+    // coverUrl / coverPublicId hidden inputs.
+    coverUrl:      emptyToNull(formData.get('coverUrl')),
+    coverPublicId: emptyToNull(formData.get('coverPublicId')),
     summary:       emptyToNull(formData.get('summary')),
   };
 }

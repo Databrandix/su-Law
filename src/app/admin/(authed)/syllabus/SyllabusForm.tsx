@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { Syllabus } from '@prisma/client';
 import ImageUploader from '@/components/admin/ImageUploader';
@@ -28,6 +28,15 @@ export default function SyllabusForm({ initial }: { initial: Syllabus | null }) 
     fileName: initial?.pdfFileName ?? '',
   });
 
+  // Same guard as the prospectus form: submitting while a file is still
+  // uploading saves the pre-upload empty URL and silently drops the file.
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const uploading = coverUploading || pdfUploading;
+
+  const handleCoverUploading = useCallback((v: boolean) => setCoverUploading(v), []);
+  const handlePdfUploading = useCallback((v: boolean) => setPdfUploading(v), []);
+
   useEffect(() => {
     if (state.ok === true) toast.success(isEdit ? 'Syllabus saved' : 'Syllabus created');
     if (state.ok === false) toast.error(state.error);
@@ -51,6 +60,22 @@ export default function SyllabusForm({ initial }: { initial: Syllabus | null }) 
                        defaultValue={initial?.summary ?? ''} />
       </Card>
 
+      <Card title="Cover image (optional)">
+        <p className="text-xs text-gray-500 -mt-2">
+          Shown on the public syllabus card. Leave this empty and the card
+          keeps using page&nbsp;1 of the PDF below as its thumbnail — upload
+          an image only when you want to override that.
+        </p>
+        <ImageUploader
+          kind="syllabus-cover"
+          name="cover"
+          aspectRatio="auto"
+          initialUrl={initial?.coverUrl ?? undefined}
+          initialPublicId={initial?.coverPublicId ?? undefined}
+          onUploadingChange={handleCoverUploading}
+        />
+      </Card>
+
       <Card title="PDF (downloadable)">
         <p className="text-xs text-gray-500 -mt-2">
           PDF served via Cloudinary auto/upload. Public download link uses this file directly.
@@ -66,6 +91,7 @@ export default function SyllabusForm({ initial }: { initial: Syllabus | null }) 
           onChange={(url, publicId, meta) => {
             setPdf({ url, publicId, fileName: meta?.fileName ?? '' });
           }}
+          onUploadingChange={handlePdfUploading}
         />
         <input type="hidden" name="pdfUrl" value={pdf.url} />
         <input type="hidden" name="pdfPublicId" value={pdf.publicId} />
@@ -82,10 +108,17 @@ export default function SyllabusForm({ initial }: { initial: Syllabus | null }) 
         <Link href="/admin/syllabus" className="px-4 py-2.5 text-gray-700 hover:text-gray-900 font-medium text-sm transition-colors">
           ← Back to syllabus
         </Link>
-        <button type="submit" disabled={pending}
-                className="bg-primary hover:bg-primary/90 text-white font-medium rounded-lg px-5 py-2.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent/40">
-          {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create syllabus'}
-        </button>
+        <div className="flex items-center gap-3">
+          {uploading && (
+            <span className="text-xs font-medium text-amber-700">
+              Upload in progress — wait before saving.
+            </span>
+          )}
+          <button type="submit" disabled={pending || uploading}
+                  className="bg-primary hover:bg-primary/90 text-white font-medium rounded-lg px-5 py-2.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent/40">
+            {uploading ? 'Uploading…' : pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create syllabus'}
+          </button>
+        </div>
       </div>
     </form>
   );

@@ -950,6 +950,13 @@ model Syllabus {
   pdfUrl        String?
   pdfPublicId   String?
   pdfFileName   String?
+  // Optional cover image. When null the card keeps deriving its
+  // thumbnail from page 1 of the PDF (Cloudinary `pg_1`), which is the
+  // behaviour every existing row relies on. Setting this overrides
+  // that — for a syllabus whose first page is a plain title sheet, or
+  // when the department wants a designed cover instead.
+  coverUrl      String?
+  coverPublicId String?
   // Optional — the card simply omits the paragraph when absent.
   summary       String?  @db.Text
   displayOrder  Int

@@ -13,6 +13,30 @@ const slugToTitle = (slug: string) =>
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
 
+/**
+ * URL segments that group pages without being a page themselves.
+ * `/about/overview` exists, `/about` does not — so linking the "About"
+ * crumb sent visitors to a 404. These render as plain text instead.
+ *
+ * Kept as an explicit list because a client component cannot ask the
+ * router whether a route exists. Add a segment here when you nest pages
+ * under a new prefix that has no index page of its own.
+ */
+const NON_NAVIGABLE_SEGMENTS = new Set(['about', 'admission', 'student-society']);
+
+/**
+ * Slugs whose mechanical title-casing reads wrong. Values match what the
+ * main navigation calls the same page, so a visitor sees one name for
+ * one destination.
+ */
+const SEGMENT_LABELS: Record<string, string> = {
+  faq: 'FAQs',
+  llb: 'LL.B.',
+  llm: 'LL.M.',
+};
+
+const labelFor = (seg: string) => SEGMENT_LABELS[seg] ?? slugToTitle(seg);
+
 interface PageShellProps {
   title: string;
   subtitle?: string;
@@ -25,6 +49,13 @@ interface PageShellProps {
   imagePosition?: string;
   /** Tailwind classes applied to the content wrapper around children. */
   contentClassName?: string;
+  /**
+   * Label for the final breadcrumb crumb. Detail pages should pass the
+   * entity's real name — derived from the slug it would otherwise read
+   * "Dr A S M Tariq Iqbal" (the dots are lost) or "Llb".
+   * Defaults to the title-cased last URL segment.
+   */
+  breadcrumbLabel?: string;
 }
 
 export default function PageShell({
@@ -37,6 +68,7 @@ export default function PageShell({
   image = '/assets/mission-vision-hero.webp',
   imagePosition = 'center',
   contentClassName = 'py-12 md:py-16',
+  breadcrumbLabel,
 }: PageShellProps) {
   const pathname = usePathname();
   const segments = pathname.split('/').filter(Boolean);
@@ -131,17 +163,21 @@ export default function PageShell({
               {segments.map((seg, idx) => {
                 const href = '/' + segments.slice(0, idx + 1).join('/');
                 const isLast = idx === segments.length - 1;
+                // A grouping prefix has no page behind it, so it is shown
+                // as text — a link there would 404.
+                const isLink = !isLast && !NON_NAVIGABLE_SEGMENTS.has(seg);
+                const text = isLast ? (breadcrumbLabel ?? labelFor(seg)) : labelFor(seg);
                 return (
                   <span key={href} className="inline-flex items-center gap-2">
                     <ChevronRight size={13} className="opacity-50" />
                     {isLast ? (
-                      <span className="text-button-yellow font-semibold">
-                        {slugToTitle(seg)}
-                      </span>
-                    ) : (
+                      <span className="text-button-yellow font-semibold">{text}</span>
+                    ) : isLink ? (
                       <a href={href} className="hover:text-button-yellow transition-colors">
-                        {slugToTitle(seg)}
+                        {text}
                       </a>
+                    ) : (
+                      <span className="text-white/70">{text}</span>
                     )}
                   </span>
                 );

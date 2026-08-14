@@ -32,6 +32,7 @@ type Kind =
   | 'club-image'
   | 'visitor-photo'
   | 'syllabus-pdf'
+  | 'syllabus-cover'
   // Phase 8a
   | 'admission-notice-hero'
   | 'admission-notice-file'
@@ -70,6 +71,9 @@ const RECOMMENDED_SIZE_BY_KIND: Record<Kind, string | null> = {
   'club-image':            'Landscape · 1200×675 (16:9)',
   'visitor-photo':         'Square portrait · 400×400',
   'syllabus-pdf':          null,
+  // Matches the prospectus cover: portrait A4, the shape a syllabus
+  // front page already has.
+  'syllabus-cover':        'Portrait · 800×1131 (A4 ratio)',
   'admission-notice-hero': 'Landscape banner · 1920×600',
   'admission-notice-file': null,
   'prospectus-cover':      'Portrait · 800×1131 (A4 ratio)',

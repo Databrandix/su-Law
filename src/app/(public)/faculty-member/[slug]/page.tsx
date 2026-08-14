@@ -152,6 +152,9 @@ export default async function FacultyDetailPage({
   return (
     <PageShell
       title={member.name}
+      // Without this the crumb is built from the slug, which drops the
+      // dots: "Dr A S M Tariq Iqbal".
+      breadcrumbLabel={member.name}
       overline="Faculty"
       image={hero?.heroImageUrl ?? '/assets/faculty-hero.webp'}
       imagePosition={hero ? `center ${hero.heroImageVerticalPercent}%` : 'center'}

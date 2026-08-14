@@ -87,6 +87,7 @@ export default async function EventDetailPage({
   return (
     <PageShell
       title={ev.shortTitle}
+      breadcrumbLabel={ev.shortTitle}
       overline={hero?.heroOverline ?? 'Events'}
       image={hero?.heroImageUrl ?? undefined}
       imagePosition={hero ? `center ${hero.heroImageVerticalPercent}%` : undefined}

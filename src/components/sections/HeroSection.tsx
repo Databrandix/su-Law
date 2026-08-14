@@ -172,7 +172,9 @@ export default function HeroSection({
               <Home size={13} /> Home
             </a>
             <ChevronRight size={13} className="opacity-50" />
-            <a href="#" className="hover:text-button-yellow transition-colors">Dept</a>
+            {/* Plain text, not an anchor: there is no department index
+                page, and href="#" was a link that visibly did nothing. */}
+            <span className="text-white/70">Dept</span>
             <ChevronRight size={13} className="opacity-50" />
             <span className="text-button-yellow font-semibold">{breadcrumbLabel}</span>
           </motion.div>

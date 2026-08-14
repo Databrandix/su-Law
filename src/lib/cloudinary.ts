@@ -53,6 +53,7 @@ const KIND_TO_SUBFOLDER: Record<string, string> = {
   'club-image':            'clubs',
   'visitor-photo':         'visitors',
   'syllabus-pdf':          'syllabus/pdfs',
+  'syllabus-cover':        'syllabus/covers',
   // Phase 8a — Admission CMS Part 1. 'admission-notice-file' and
   // 'prospectus-pdf' both reuse the /auto/upload endpoint (image or
   // PDF auto-detected); the admin forms pass accept='application/pdf'

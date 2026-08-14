@@ -93,6 +93,9 @@ export default async function ClubDetailPage({
   return (
     <PageShell
       title={club.heroTitle ?? club.name}
+      // The club's own name, not the hero headline, which can be a
+      // marketing line rather than a label.
+      breadcrumbLabel={club.name}
       overline={club.heroOverline ?? 'Student Society'}
       image={club.heroImageUrl ?? club.imageUrl}
       contentClassName="bg-gray-50 py-12 md:py-20"

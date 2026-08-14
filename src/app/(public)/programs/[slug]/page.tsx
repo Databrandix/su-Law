@@ -135,6 +135,9 @@ export default async function ProgramDetailPage({
   return (
     <PageShell
       title={program.programName}
+      // Slug-derived this reads "Llb"; the degree code is what the rest
+      // of the site calls it.
+      breadcrumbLabel={program.degreeCode ? `${program.degreeCode.replace(/\.?$/, '.')}` : program.programName}
       subtitle={hero?.heroSubtitle ?? undefined}
       overline={program.overline || hero?.heroOverline || 'Programs'}
       image={hero?.heroImageUrl ?? undefined}

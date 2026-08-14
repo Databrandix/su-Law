@@ -41,6 +41,8 @@ export default async function SyllabusPage() {
             department: s.department,
             level:      s.level,
             pdfUrl:     s.pdfUrl,
+            // Null here means "derive the thumbnail from the PDF".
+            coverUrl:   s.coverUrl,
             summary:    s.summary,
           }))}
         />
