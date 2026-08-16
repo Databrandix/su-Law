@@ -5,6 +5,10 @@ import {motion} from 'motion/react';
 import Container from '../ui/Container';
 import {ChevronRight, Home} from 'lucide-react';
 
+// The parent institution. The homepage breadcrumb's "Home" step leads
+// here rather than to "/", which is the page it already sits on.
+const UNIVERSITY_SITE_URL = 'https://su.edu.bd/';
+
 // Per-image alt text now comes from DepartmentIdentity.heroImage{N}Alt
 // (Phase 3). When an admin replaces a hero image, they edit the
 // matching alt in the same form. Null alt → generic slot label.
@@ -168,7 +172,18 @@ export default function HeroSection({
             transition={{ delay: 0.9 }}
             className="flex items-center justify-center gap-2 text-white/90 text-xs md:text-[13px] font-medium tracking-wide"
           >
-            <a href="/" className="hover:text-button-yellow flex items-center gap-1.5 transition-colors">
+            {/* Points at the university's main site, not "/". This hero
+                renders only on the department homepage, so a link to "/"
+                would reload the page the visitor is already on; the
+                useful "up" destination from here is su.edu.bd.
+                Same tab on purpose — it is a navigation step up the
+                hierarchy, not a side trip, so it should not spawn a tab.
+                Inner pages keep "Home" → "/" via PageShell. */}
+            <a
+              href={UNIVERSITY_SITE_URL}
+              rel="noopener"
+              className="hover:text-button-yellow flex items-center gap-1.5 transition-colors"
+            >
               <Home size={13} /> Home
             </a>
             <ChevronRight size={13} className="opacity-50" />
